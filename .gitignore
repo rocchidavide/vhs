@@ -11,13 +11,16 @@ __pycache__/
 node_modules/
 frontend/dist/
 
-# Environment and local data
+# Environment and local data: every .env file except the two templates
 .env
+.env.*
+!.env.example
+!.env.dev.example
 video-library/
 staticfiles/
+restore-reports/
 
 # OS / editor
 .DS_Store
 .idea/
 .vscode/
-restore-reports/
