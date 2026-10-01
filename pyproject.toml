@@ -1,0 +1,48 @@
+[project]
+name = "vhs"
+version = "0.1.0"
+description = "Video Hoarding System — a personal video library to archive and play videos"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "django>=6,<7",
+    "django-ninja>=1.7.1",
+    "django-q2>=1.11.1",
+    "psycopg[binary]>=3.3.6",
+    "uvicorn>=0.54.0",
+    "yt-dlp[default]>=2026.8.19",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+    "pytest-django>=4.14.0",
+    "pytest-env>=1.7.1",
+    "ruff>=0.16.9",
+    "watchfiles>=1.3.0",
+]
+
+[tool.uv]
+package = false
+
+[tool.pytest.ini_options]
+DJANGO_SETTINGS_MODULE = "config.settings"
+pythonpath = ["backend"]
+testpaths = ["backend/tests"]
+addopts = "-ra"
+env = [
+    "DJANGO_SECRET_KEY=test-secret-key",
+    "DJANGO_DEBUG=false",
+    "DJANGO_SECURE_COOKIES=true",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py313"
+extend-exclude = ["backend/core/migrations", "*.md"]
+
+[tool.ruff.lint]
+select = ["E", "F", "W", "I", "B", "UP", "DJ"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["config", "core", "api", "engine", "storage", "services", "tasks"]

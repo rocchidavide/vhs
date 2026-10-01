@@ -1,0 +1,111 @@
+{
+  "_has_drm": null,
+  "_type": "video",
+  "_version": {
+    "current_git_head": null,
+    "release_git_head": "594bd50c2c78ac432f81600d309fdc4e0a92d82c",
+    "repository": "yt-dlp/yt-dlp",
+    "version": "2026.08.19"
+  },
+  "abr": 129.796,
+  "acodec": "mp4a.40.2",
+  "age_limit": 0,
+  "aspect_ratio": 1.33,
+  "asr": 44100,
+  "audio_channels": 2,
+  "availability": "public",
+  "average_rating": null,
+  "categories": [
+    "Film & Animation"
+  ],
+  "channel": "jawed",
+  "channel_id": "UC4QobU6STFB0P71PMvOGN5A",
+  "channel_is_verified": true,
+  "channel_url": "https://www.youtube.com/channel/UC4QobU6STFB0P71PMvOGN5A",
+  "chapters": [
+    {
+      "end_time": 5,
+      "start_time": 0,
+      "title": "Intro"
+    },
+    {
+      "end_time": 17,
+      "start_time": 5,
+      "title": "The cool thing"
+    },
+    {
+      "end_time": 19,
+      "start_time": 17,
+      "title": "End"
+    }
+  ],
+  "creators": null,
+  "description": "Microplastics are accumulating in human brains at an alarming rate\nhttps://www.youtube.com/watch?v=0PT5c1z3LL8\n\n“Nanoplastics and Human Health” with Matthew J Campen, PhD, MSPH\nhttps://www.youtube.com/watch?v=RRBN_4L09Mg\n\n00:00 Intro\n00:05 The cool thing\n00:17 End",
+  "display_id": "jNQXAC9IVRw",
+  "duration": 19,
+  "duration_string": "19",
+  "dynamic_range": "SDR",
+  "ext": "mp4",
+  "extractor": "youtube",
+  "extractor_key": "Youtube",
+  "filesize_approx": 742369,
+  "format": "133 - 320x240 (240p)+140 - audio only (medium)",
+  "format_id": "133+140",
+  "format_note": "240p+medium",
+  "fps": 15,
+  "fulltitle": "Me at the zoo",
+  "height": 240,
+  "id": "jNQXAC9IVRw",
+  "is_live": false,
+  "language": null,
+  "live_status": "not_live",
+  "location": "SAN DIEGO ZOO",
+  "media_type": "video",
+  "original_url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+  "playable_in_embed": true,
+  "playlist": null,
+  "playlist_index": null,
+  "protocol": "https+https",
+  "release_timestamp": null,
+  "release_year": null,
+  "requested_formats": [
+    {
+      "acodec": "none",
+      "ext": "mp4",
+      "filesize": 433081,
+      "filesize_approx": 433080,
+      "format_id": "133",
+      "vcodec": "avc1.4d400c"
+    },
+    {
+      "acodec": "mp4a.40.2",
+      "ext": "m4a",
+      "filesize": 309288,
+      "filesize_approx": 309287,
+      "format_id": "140",
+      "vcodec": "none"
+    }
+  ],
+  "resolution": "320x240",
+  "stretched_ratio": null,
+  "tags": [
+    "me at the zoo",
+    "jawed karim",
+    "first youtube video"
+  ],
+  "tbr": 312.791,
+  "thumbnail": "https://i.ytimg.com/vi/jNQXAC9IVRw/hqdefault.jpg?sqp=-oaymwEmCOADEOgC8quKqQMa8AEB-AG-AoAC8AGKAgwIABABGFUgWShlMA8=&rs=AOn4CLA9eLBatYv9WbkD4BbZ2Im-biSPTw",
+  "timestamp": 1114313512,
+  "title": "Me at the zoo",
+  "upload_date": "20050424",
+  "uploader": "jawed",
+  "uploader_id": "@jawed",
+  "uploader_url": "https://www.youtube.com/@jawed",
+  "vbr": 182.995,
+  "vcodec": "avc1.4d400c",
+  "was_live": false,
+  "webpage_url": "https://www.youtube.com/watch?v=jNQXAC9IVRw",
+  "webpage_url_basename": "watch",
+  "webpage_url_domain": "youtube.com",
+  "width": 320
+}

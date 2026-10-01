@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+.ruff_cache/
+# Compiled translation catalogs: built into the image (docs/development.md)
+*.mo
+
+# Node
+node_modules/
+frontend/dist/
+
+# Environment and local data
+.env
+video-library/
+staticfiles/
+
+# OS / editor
+.DS_Store
+.idea/
+.vscode/
+restore-reports/

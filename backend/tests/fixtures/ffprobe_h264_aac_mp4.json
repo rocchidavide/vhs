@@ -1,0 +1,30 @@
+{
+  "streams": [
+    {
+      "index": 0,
+      "codec_name": "h264",
+      "codec_type": "video",
+      "profile": "High",
+      "pix_fmt": "yuv420p",
+      "width": 320,
+      "height": 240,
+      "disposition": {
+        "attached_pic": 0
+      }
+    },
+    {
+      "index": 1,
+      "codec_name": "aac",
+      "codec_type": "audio",
+      "profile": "LC",
+      "channels": 1,
+      "disposition": {
+        "attached_pic": 0
+      }
+    }
+  ],
+  "format": {
+    "format_name": "mov,mp4,m4a,3gp,3g2,mj2",
+    "duration": "2.000000"
+  }
+}

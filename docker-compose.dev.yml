@@ -1,0 +1,93 @@
+# Development: the same services as docker-compose.yml, with the repository mounted, automatic
+# reload and the Vite dev server. It is an override, always used together with the main file;
+# .env.dev.example sets COMPOSE_FILE=docker-compose.yml:docker-compose.dev.yml so that plain
+# "docker compose ..." commands act on the development environment. See docs/development.md.
+#
+# Open http://localhost:${VHS_DEV_HTTP_PORT:-8081} (loopback only): Nginx forwards the API to
+# Django (runserver) and everything else to Vite, and serves the protected media, as in
+# production. Services reach each other by name inside the Docker network.
+#
+# Ports and volumes of an override ADD to those of docker-compose.yml, build/image/command
+# replace them: "!override" and "!reset" below keep only what development needs. Check the
+# merged configuration with scripts/check-dev-config.sh.
+
+name: vhs-dev
+
+x-backend-dev: &backend-dev
+  build:
+    target: dev
+  image: vhs-backend-dev
+  # On Linux, set VHS_UID/VHS_GID to your ids if they are not 1000, so that files created in
+  # the mounted repository (e.g. migrations) stay yours.
+  user: "${VHS_UID:-1000}:${VHS_GID:-1000}"
+
+x-repository: &repository
+  type: bind
+  source: .
+  target: /app
+
+x-library: &library
+  type: bind
+  source: ${VHS_HOST_LIBRARY:?set VHS_HOST_LIBRARY in .env (see .env.dev.example)}
+  target: /srv/video-library
+  bind:
+    create_host_path: false
+
+services:
+  migrate:
+    <<: *backend-dev
+    volumes: !override
+      - *repository
+      - *library
+      - static:/srv/static
+
+  backend:
+    <<: *backend-dev
+    command: python manage.py runserver 0.0.0.0:8000
+    volumes: !override
+      - *repository
+      - *library
+
+  worker:
+    <<: *backend-dev
+    # Restarts qcluster whenever Python code changes.
+    command: watchfiles --filter python "python manage.py qcluster" /app/backend
+    volumes: !override
+      - *repository
+      - *library
+
+  frontend:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.frontend-dev
+    image: vhs-frontend-dev
+    # "npm install" is quick when node_modules is already up to date with package-lock.json.
+    command: sh -c "npm install --no-audit --no-fund && exec npm run dev"
+    environment:
+      VHS_VITE_HOST: 0.0.0.0
+      VHS_BACKEND_URL: http://backend:8000
+    volumes:
+      - type: bind
+        source: ./frontend
+        target: /app/frontend
+      # Linux packages for the container, separate from any node_modules on the host.
+      - node_modules:/app/frontend/node_modules
+
+  nginx:
+    build: !reset null
+    image: nginx:alpine
+    ports: !override
+      # Loopback only: the development environment is never exposed on the LAN.
+      - "127.0.0.1:${VHS_DEV_HTTP_PORT:-8081}:80"
+    volumes: !override
+      - ./docker/nginx.dev.conf:/etc/nginx/conf.d/default.conf:ro
+      - <<: *library
+        read_only: true
+    depends_on: !override
+      backend:
+        condition: service_healthy
+      frontend:
+        condition: service_started
+
+volumes:
+  node_modules:

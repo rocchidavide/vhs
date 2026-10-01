@@ -1,0 +1,21 @@
+# Production override (restart policies, public ports):
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+services:
+  db:
+    restart: unless-stopped
+
+  backend:
+    restart: unless-stopped
+
+  worker:
+    restart: unless-stopped
+
+  nginx:
+    restart: unless-stopped
+    ports: !override
+      - "80:80"
+      - "443:443"
+    volumes:
+      - static:/srv/static:ro
+      # - ./certs:/etc/nginx/certs:ro

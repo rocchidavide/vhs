@@ -1,0 +1,221 @@
+{
+  "app": {
+    "name": "VHS"
+  },
+  "common": {
+    "loading": "Loading…",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "remove": "Remove",
+    "create": "Create",
+    "operationFailed": "The operation failed.",
+    "unknownChannel": "Unknown channel",
+    "unknownDate": "unknown date",
+    "notArchived": "Not archived",
+    "videoCount": "{n} video | {n} videos",
+    "videoCountArchived": "{total}, {n} archived"
+  },
+  "nav": {
+    "home": "Home",
+    "library": "Library",
+    "collections": "Collections",
+    "tags": "Personal tags",
+    "downloads": "Downloads",
+    "logout": "Sign out"
+  },
+  "login": {
+    "username": "Username",
+    "password": "Password",
+    "submit": "Sign in",
+    "invalid": "Wrong username or password.",
+    "failed": "Sign-in failed. Try again shortly."
+  },
+  "dashboard": {
+    "title": "Home",
+    "systemStatus": "System status",
+    "unreachable": "Backend unreachable",
+    "status": "API: {api} · Database: {database} · Library: {storage}",
+    "checking": "Checking…"
+  },
+  "storage": {
+    "unavailable": "Library not available.",
+    "noWrites": "No file is written until the library is available again.",
+    "state": {
+      "not_initialized": "The library is not initialized: run \"manage.py init_library\" once.",
+      "missing": "The library was not found: the registered files are not in the configured folder."
+    }
+  },
+  "apiErrors": {
+    "duplicate": "A personal tag with this name already exists.",
+    "not_found": "Not found.",
+    "media_unavailable": "The video is not available.",
+    "storage_unavailable": "The library is not available.",
+    "not_playable": "The video cannot be played in the browser.",
+    "csrf_failed": "Your session has expired: reload the page and try again.",
+    "invalid_credentials": "Wrong username or password."
+  },
+  "downloads": {
+    "title": "Downloads",
+    "urlLabel": "Video URL",
+    "urlPlaceholder": "Paste the URL of a YouTube video",
+    "submit": "Download",
+    "checking": "Checking…",
+    "added": "Download added to the queue.",
+    "alreadyQueued": "This video is already queued or archived.",
+    "alreadyArchived": "This video is already archived.",
+    "openVideo": "Open the video",
+    "requestFailed": "The request failed. Try again shortly.",
+    "retryFailed": "Could not retry the download.",
+    "loadFailed": "Could not load the downloads.",
+    "inProgress": "In progress",
+    "noneInProgress": "No download in progress.",
+    "history": "History",
+    "noHistory": "No finished download.",
+    "retry": "Retry",
+    "progress": "{percent}% · {done} of {total} · {speed} · ETA {eta}",
+    "processing": "Checking and archiving the file…",
+    "waiting": "Waiting for a worker…",
+    "stalled": "No progress for {minutes} min: the download may be stuck.",
+    "progressLabel": "Progress of {title}",
+    "status": {
+      "queued": "Queued",
+      "downloading": "Downloading",
+      "processing": "Processing",
+      "completed": "Completed",
+      "failed": "Failed",
+      "cancelled": "Cancelled"
+    },
+    "error": {
+      "authentication": "The platform requires signing in",
+      "source_unavailable": "Video not available on the platform",
+      "network": "Network error",
+      "storage": "Storage error",
+      "processing": "Processing error",
+      "unsupported_url": "Unsupported URL",
+      "playlist": "Playlists and channels are not supported",
+      "interrupted": "Download interrupted",
+      "unknown": "Unexpected error"
+    }
+  },
+  "library": {
+    "title": "Library",
+    "search": "Search",
+    "searchPlaceholder": "Search by title, description, channel or personal tag",
+    "channel": "Channel",
+    "allChannels": "All channels",
+    "personalTag": "Personal tag",
+    "filterByTag": "Filter by personal tag…",
+    "collection": "Collection",
+    "allCollections": "All collections",
+    "playback": "Playback",
+    "allStates": "All states",
+    "orderBy": "Sort by",
+    "activeTags": "Personal tags (all of them):",
+    "loadFailed": "Could not load the library.",
+    "noMatch": "No video matches the filters.",
+    "empty": "The library is empty: add a video from the Downloads page.",
+    "loadMore": "Load more",
+    "ordering": {
+      "position": "Collection order",
+      "recent": "Recently added",
+      "published": "Publication date",
+      "title": "Title",
+      "duration": "Duration"
+    }
+  },
+  "playback": {
+    "status": {
+      "ready": "Ready",
+      "preparing": "Preparing",
+      "unavailable": "Unavailable"
+    },
+    "browserCopy": "Browser copy:",
+    "derived": "(derived copy)",
+    "original": "(original file)",
+    "analyzing": "Analyzing the file…",
+    "remuxQueued": "Container change queued…",
+    "remuxRunning": "Changing the container…",
+    "remuxRunningPercent": "Changing the container ({percent}%)…",
+    "transcodeQueued": "Conversion queued…",
+    "transcodeRunning": "Converting…",
+    "transcodeRunningPercent": "Converting ({percent}%)…",
+    "lastAttemptFailed": "The last attempt failed: {message}",
+    "prepare": "Prepare for playback",
+    "retryPreparation": "Retry the preparation",
+    "prepareHint": "The conversion creates a copy for the browser: the archived file is not changed.",
+    "prepareFailed": "Could not start the preparation.",
+    "playError": "Playback failed. Make sure VHS is opened through Nginx (port 8081 in development).",
+    "issue": {
+      "no_video": "The file contains no video.",
+      "video_codec": "{codec} video is not supported by every browser.",
+      "pixel_format": "H.264 video with pixel format {pix_fmt} is not supported.",
+      "audio_codec": "{codec} audio is not supported by every browser.",
+      "container": "The {container} container cannot be played: changing it to MP4 is enough.",
+      "analysis_failed": "The file could not be analyzed.",
+      "not_archived": "The video is not archived."
+    },
+    "action": {
+      "remux": "The container must be changed to MP4.",
+      "transcode": "The video must be converted to play in the browser.",
+      "unsupported": "The video cannot be played in the browser."
+    }
+  },
+  "video": {
+    "notFound": "Video not found.",
+    "loadFailed": "Could not load the video.",
+    "watched": "Watched {percent}%",
+    "personalTags": "Personal tags",
+    "noPersonalTags": "No personal tags.",
+    "collections": "Collections",
+    "notInCollection": "The video is not in any collection.",
+    "sourceTags": "Source tags",
+    "sourceTagsHint": "Platform metadata, read-only in VHS."
+  },
+  "tags": {
+    "title": "Personal tags",
+    "intro": "Labels you assign to videos. They are separate from the platform's tags, which stay in the source metadata.",
+    "newPlaceholder": "New personal tag",
+    "newLabel": "Name of the new personal tag",
+    "nameLabel": "Name of the personal tag",
+    "color": "Color",
+    "colorOption": "Color {color}",
+    "loadFailed": "Could not load the personal tags.",
+    "empty": "No personal tags yet. Create them here or from a video's page.",
+    "confirmDelete": "Delete the personal tag \"{name}\"?",
+    "deleteEffect": "It will be removed from {n} video, which stays in the library. | It will be removed from {n} videos, which stay in the library.",
+    "removeTag": "Remove the personal tag {name}",
+    "add": "Add a personal tag",
+    "addPlaceholder": "Add a personal tag…",
+    "createOption": "Create personal tag \"{name}\""
+  },
+  "collections": {
+    "title": "Collections",
+    "intro": "Groups of videos in the order you choose. A video can be in several collections without duplicating the file.",
+    "newName": "Name of the new collection",
+    "create": "Create collection",
+    "createFailed": "Could not create the collection.",
+    "loadFailed": "Could not load the collections.",
+    "empty": "No collections yet. Create one here, or from a video's page with \"Add to collection\".",
+    "back": "← Collections",
+    "notFound": "Collection not found.",
+    "loadOneFailed": "Could not load the collection.",
+    "openInLibrary": "Open in Library",
+    "name": "Name",
+    "description": "Description",
+    "emptyCollection": "The collection is empty. Add videos from their page with \"Add to collection\".",
+    "reorderHint": "Drag the videos or use ↑ ↓ to change the order.",
+    "cover": "Cover",
+    "useAsCover": "Use as cover",
+    "automaticCover": "Automatic cover",
+    "moveUp": "Move up: {title}",
+    "moveDown": "Move down: {title}",
+    "confirmDelete": "Delete the collection \"{name}\"? The videos stay in the library.",
+    "deleteFailed": "Could not delete the collection.",
+    "addTo": "Add to a collection",
+    "addToPlaceholder": "Add to collection…",
+    "newOption": "+ New collection…",
+    "createAndAdd": "Create and add"
+  }
+}

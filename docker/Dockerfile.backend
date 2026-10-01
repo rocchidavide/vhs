@@ -1,0 +1,69 @@
+# Backend image: Django, django-q2 worker, yt-dlp, ffmpeg.
+#   prod  what users run (docker-compose.yml): dependencies and code baked in
+#   dev   development (docker-compose.dev.yml): dev dependencies too, the code is mounted
+
+FROM python:3.13-slim AS base
+
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    UV_COMPILE_BYTECODE=1 \
+    UV_LINK_MODE=copy \
+    UV_PROJECT_ENVIRONMENT=/opt/venv \
+    PATH="/opt/venv/bin:$PATH"
+
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ffmpeg \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
+# JavaScript runtime required by yt-dlp for YouTube.
+COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
+
+RUN useradd --create-home --uid 1000 vhs \
+    && mkdir -p /srv/video-library /srv/static \
+    && chown vhs:vhs /srv/video-library /srv/static
+
+WORKDIR /app
+
+ENV VHS_MEDIA_ROOT=/srv/video-library \
+    DJANGO_STATIC_ROOT=/srv/static
+
+EXPOSE 8000
+
+
+FROM base AS dev
+
+# gettext: makemessages and compilemessages for translation catalogs (docs/development.md).
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends gettext \
+    && rm -rf /var/lib/apt/lists/*
+
+COPY pyproject.toml uv.lock ./
+# Dev group included (pytest, ruff, watchfiles). The repository is mounted on /app.
+RUN uv sync --frozen --no-install-project
+
+USER vhs
+WORKDIR /app/backend
+CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
+
+
+FROM base AS prod
+
+COPY pyproject.toml uv.lock ./
+RUN uv sync --frozen --no-dev --no-install-project
+
+COPY backend ./backend
+
+# Compile the translation catalogs, when there are any (English is the source language and
+# needs none). gettext is installed only for this step.
+RUN if [ -d backend/locale ]; then \
+        apt-get update \
+        && apt-get install -y --no-install-recommends gettext \
+        && (cd backend && DJANGO_DEBUG=true python manage.py compilemessages) \
+        && apt-get purge -y gettext && apt-get autoremove -y \
+        && rm -rf /var/lib/apt/lists/*; \
+    fi
+
+USER vhs
+WORKDIR /app/backend
+CMD ["uvicorn", "config.asgi:application", "--host", "0.0.0.0", "--port", "8000"]

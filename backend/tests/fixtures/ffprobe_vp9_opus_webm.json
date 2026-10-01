@@ -1,0 +1,29 @@
+{
+  "streams": [
+    {
+      "index": 0,
+      "codec_name": "vp9",
+      "codec_type": "video",
+      "profile": "Profile 0",
+      "pix_fmt": "yuv420p",
+      "width": 320,
+      "height": 240,
+      "disposition": {
+        "attached_pic": 0
+      }
+    },
+    {
+      "index": 1,
+      "codec_name": "opus",
+      "codec_type": "audio",
+      "channels": 1,
+      "disposition": {
+        "attached_pic": 0
+      }
+    }
+  ],
+  "format": {
+    "format_name": "matroska,webm",
+    "duration": "2.008000"
+  }
+}
