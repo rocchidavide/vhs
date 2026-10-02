@@ -62,6 +62,28 @@ and collections:
 
 </details>
 
+## Why VHS?
+
+The download itself is done by [yt-dlp](https://github.com/yt-dlp/yt-dlp): VHS is
+everything that comes after it. It is a library for the videos you choose one by one,
+kept on your disk with their metadata and checksums, played in the browser where you
+left off, organized your way, verified and backed up.
+
+Other good projects cover nearby needs, and may suit you better:
+
+- [MeTube](https://github.com/alexta69/metube) is a web interface for yt-dlp: it downloads
+  into a folder, without a library to browse and play;
+- [Tube Archivist](https://github.com/tubearchivist/tubearchivist) and
+  [Pinchflat](https://github.com/kieraneglin/pinchflat) archive whole channels and
+  playlists automatically, which VHS does not do yet (subscriptions are on the
+  [roadmap](#roadmap));
+- [Jellyfin](https://jellyfin.org/) and Plex play a media collection, but do not
+  download it.
+
+VHS focuses on a personal collection with care for your data (complete files only,
+checksums, read-only verification, verified backups), no lock-in (plain folders that stay
+readable without VHS) and a light stack.
+
 ## Under the hood
 
 VHS is a small project built like a system meant to last: every choice below is
