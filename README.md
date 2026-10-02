@@ -5,7 +5,7 @@ from YouTube (and, in the future, from other platforms). API-first: the Vue SPA 
 client of the `/api/v1/` API.
 
 Status: **MVP in progress**: Phases 0, 1, 2a, 2b and the essential part of Phase 3
-implemented; the first release still needs a license.
+implemented; the first release is being prepared.
 
 On the Downloads page you paste the URL of a YouTube video: VHS downloads it in the
 background, archives it with the `.info.json` and `.webp` sidecars and records its SHA-256
@@ -24,7 +24,7 @@ In the MVP, videos enter VHS only through a URL requested by the user.
 | Personal tags and collections | MVP, implemented |
 | Essential reliability (Phase 3), with local storage: unavailable library, orphaned main file, file verification, backups with a restore test | MVP, implemented |
 | Installation and development guides | MVP, written |
-| License for the first release | MVP, to do |
+| License for the first release | MVP, done (MIT) |
 | Metrics and advanced automation (Phase 3) | post-MVP |
 | Subscriptions to channels and playlists (full archive, polling) | post-MVP |
 | Jellyfin integration (NFO, layout, excluding `.browser/`) | post-MVP, independent of subscriptions |
@@ -59,4 +59,4 @@ on, `./vhs` gathers the everyday commands (`./vhs help`).
 
 ## License
 
-To be defined before publication as an open source project.
+VHS is released under the [MIT License](LICENSE).

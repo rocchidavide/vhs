@@ -2112,8 +2112,8 @@ The priority is to build **solid foundations and a complete vertical slice**.
 In the MVP, videos enter VHS only through a URL requested by the user. The source channels
 of downloaded videos remain as metadata and as a Library filter; personal collections stay
 independent of the source's channels and playlists. What remains to complete the MVP is the
-documentation and license needed to publish the first release, and the pre-release checks
-(§39).
+documentation needed to publish the first release and the pre-release checks (§39); the
+license is MIT ([LICENSE](../LICENSE)).
 
 ## Phase 0 — Foundation
 
@@ -2314,7 +2314,7 @@ The MVP includes only what is needed to publish the first release: the choice of
 source license and the essential documentation (installation, configuration, usage). The
 rest is post-MVP:
 
-- open source license chosen before the repository is published (MVP);
+- open source license chosen before the repository is published (MVP; done: MIT);
 - API documentation and the already generated OpenAPI schema;
 - dedicated authentication for external clients;
 - CLI;
@@ -2747,9 +2747,8 @@ Other backends may be added in the future if a real use case arises.
 - Jellyfin integration (NFO, verified layout) and evaluation of Plex, in a
   dedicated post-MVP phase.
 
-These decisions must not block the v1 core. The license can be chosen after the
-private prototype, but it must be defined before presenting the repository as an
-open source project.
+These decisions must not block the v1 core. The license, chosen before presenting the
+repository as an open source project, is MIT ([LICENSE](../LICENSE)).
 
 ---
 
