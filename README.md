@@ -38,8 +38,8 @@ created automatically from channels or playlists. Details in §39 of
 
 ## Documentation
 
-- **[Installing VHS](docs/installation.md)**: for users. Requirements,
-  video folder, configuration, startup, HTTPS, library verification,
+- **[Installing VHS](docs/installation.md)**: for users. Requirements, tested
+  environments, video folder, configuration, startup, HTTPS, library verification,
   backup and restore, updates.
 - **[Developing VHS](docs/development.md)**: for people who work on the code. Development
   environment, player, tests, full test stack.

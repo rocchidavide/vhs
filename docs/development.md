@@ -27,8 +27,8 @@ video folder (`./video-library`, excluded from git).
 ## Requirements
 
 - **Docker** with a recent **Docker Compose** that supports the `!override` and
-  `!reset` tags in Compose files (VHS is tested with Compose 5.4; a version that is too
-  old stops immediately with an error reading the files).
+  `!reset` tags in Compose files (VHS is tested with Compose 5.4 and 5.5; a version that
+  is too old stops immediately with an error reading the files).
 - **git**.
 - Optional, for the editor only: **Node.js** 22.18+ or 24.12+, so that PyCharm
   understands the Vue and TypeScript code (see "PyCharm").

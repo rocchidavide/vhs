@@ -34,6 +34,20 @@ A VHS installation is made of:
 > situation. Reasons and plans:
 > [storage-decisions.md](storage-decisions.md).
 
+### Tested environments
+
+VHS 0.1.0 has been tried on these systems (October 2026). Others with a recent Docker and
+Compose should work too: these are only the combinations checked so far.
+
+| System | Architecture | Docker / Compose | What was checked |
+|---|---|---|---|
+| Ubuntu Server 26.04.1 LTS (virtual machine) | arm64 | 29.8.2 / 5.5.1 | the whole guide: installation, sign-in over HTTP from another computer, a real download, playback (including seeking), symlink protection, backup and restore with `sudo`, automatic restart after a reboot |
+| Linux Mint 22.2 (based on Ubuntu 24.04) | x86_64 | 29.8.1 / 5.5.1 | installation and everyday use, file ownership (uid 1000) |
+| macOS 26.6 with Docker Desktop | arm64 (Apple Silicon) | 29.7.2 / 5.4.0 | installation with sign-in over HTTP from the local network; development environment |
+
+Every change is also tested automatically on Ubuntu x86_64 (backend and frontend tests,
+production images): see the CI in `.github/workflows/ci.yml`.
+
 ## 1. Download VHS
 
 ```bash
