@@ -15,8 +15,16 @@ A VHS installation is made of:
 
 - A Linux server, a VM or a home computer with a recent **Docker** and **Docker
   Compose** (the `docker compose` plugin) that supports the `!override` and `!reset`
-  tags in Compose files. VHS is tested with Compose 5.4; with a version that is too
-  old, `docker compose` stops immediately with an error while reading the files.
+  tags in Compose files. VHS is tested with Compose 5.4 and 5.5; with a version that is
+  too old, `docker compose` stops immediately with an error while reading the files.
+  Install Docker from its official packages
+  ([instructions](https://docs.docker.com/engine/install/)), not from the snap package,
+  whose confinement limits access to folders such as `/srv`.
+- **Your user can run `docker` without `sudo`:** add it to the `docker` group, as in
+  Docker's [post-installation steps](https://docs.docker.com/engine/install/linux-postinstall/)
+  (`sudo usermod -aG docker $USER`), then log out and back in. Check with `docker ps`.
+  Members of the `docker` group have root-level control of the machine: add only
+  trusted users.
 - **git**, to download and update VHS.
 - **rsync**, for backups.
 - Disk space for the videos: the library folder must be on the server's own disk.
