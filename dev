@@ -37,6 +37,7 @@ Usage: ./dev <command> [arguments]
   shell               Django shell
   after-debug         bring backend and worker back after debugging from PyCharm
   check-config        check the merged configuration of the Compose files
+  check-symlinks      check that Nginx never serves a symlink from the library
   help                this list
 EOF
 }
@@ -99,6 +100,10 @@ case "$command" in
   after-debug)
     # --no-deps: do not rerun the migrate service (and its reconciliation).
     run docker compose up -d --no-deps backend worker
+    ;;
+
+  check-symlinks)
+    run scripts/check-nginx-symlinks.sh
     ;;
 
   check-config)

@@ -95,6 +95,7 @@ which in turn refuses to start with the development `.env`.
 | Django shell | `./dev shell` | `… manage.py shell` |
 | After a PyCharm debug session | `./dev after-debug` | `docker compose up -d --no-deps backend worker` |
 | Check the Compose files | `./dev check-config` | `scripts/check-dev-config.sh` |
+| Check that Nginx serves no symlink | `./dev check-symlinks` | `scripts/check-nginx-symlinks.sh` |
 
 Migrations are also applied on every `./dev start`, by the
 `migrate` service, which uses the same mounted code as `backend` and `worker`.
@@ -110,6 +111,11 @@ neither the database nor the videos. `down -v` **deletes the development databas
 
 To check the resulting configuration of the Compose files (ports, builds,
 mounts), for example after editing them: `./dev check-config`.
+
+After editing `docker/nginx.conf` or `docker/nginx.dev.conf`, run `./dev check-symlinks`: it
+starts both configs in throwaway containers against a stub backend and checks that no
+symbolic link in the library is served through `/media-internal/`, even when an
+`X-Accel-Redirect` points at it (§39 of [architecture.md](architecture.md)).
 
 ## PyCharm
 

@@ -2217,11 +2217,13 @@ With these three blocks, the essential part of Phase 3 is complete.
 
 **Pre-release checks** (final verifications, not roadmap blocks):
 
-- end-to-end test that Nginx, with `nginx.conf` and `nginx.dev.conf`, refuses to serve a
-  symbolic link in the library through `/media-internal/` (`disable_symlinks on`) even
-  when the path comes from an `X-Accel-Redirect`: an error response and no bytes of the
-  external file. Today the refusal is proven by tests only on the Django side
-  (`get_media_path()`).
+- (done: `scripts/check-nginx-symlinks.sh`, `./dev check-symlinks`) end-to-end test that
+  Nginx, with `nginx.conf` and `nginx.dev.conf`, refuses to serve a symbolic link in the
+  library through `/media-internal/` (`disable_symlinks on`) even when the path comes from
+  an `X-Accel-Redirect`: an error response and no bytes of the external file. Symlinked
+  files get 403, files under a symlinked directory 404; a control run with
+  `disable_symlinks off` proves that the links do reach the outside file. Django refuses
+  symlinks first (`get_media_path()`, pytest).
 
 - handling of and recovery from storage and download failures: library unavailable (done),
   storage full, errors during writing, worker restarts, with dedicated tests;
