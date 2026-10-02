@@ -1,63 +1,138 @@
 # VHS — Video Hoarding System
 
-A personal video library to download, archive, organize and play videos
-from YouTube (and, in the future, from other platforms). API-first: the Vue SPA is a
-client of the `/api/v1/` API.
+[![CI](https://github.com/rocchidavide/vhs/actions/workflows/ci.yml/badge.svg)](https://github.com/rocchidavide/vhs/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 
-Status: **MVP in progress**: Phases 0, 1, 2a, 2b and the essential part of Phase 3
-implemented; the first release is being prepared.
+**Your own copy of the videos you care about.** VHS is a self-hosted video library: paste
+the URL of a video, and it downloads it, archives it with its metadata on your own disk,
+and lets you organize it and play it in the browser. Videos disappear from platforms;
+the ones in VHS stay yours, on a server at home.
 
-On the Downloads page you paste the URL of a YouTube video: VHS downloads it in the
-background, archives it with the `.info.json` and `.webp` sidecars and records its SHA-256
-checksum. The Library lets you search and filter videos (by source channel too); the video
-page plays them through protected streaming and resumes where you left off. Videos are
-organized with **personal tags** and sortable **collections**, separate from the
-platform's tags and playlists.
+YouTube is the first supported platform; VHS is built to support more.
 
-## MVP scope and roadmap
+![The VHS library: video thumbnails with personal tags, filters by channel, tag and collection](docs/images/library.jpg)
 
-In the MVP, videos enter VHS only through a URL requested by the user.
+## Features
 
-| Area | Status |
-| ---- | ----- |
-| On-demand downloads, library, playback, formats | MVP, implemented |
-| Personal tags and collections | MVP, implemented |
-| Essential reliability (Phase 3), with local storage: unavailable library, orphaned main file, file verification, backups with a restore test | MVP, implemented |
-| Installation and development guides | MVP, written |
-| License for the first release | MVP, done (MIT) |
-| Metrics and advanced automation (Phase 3) | post-MVP |
-| Other platforms besides YouTube | post-MVP |
-| Subscriptions to channels and playlists (full archive, polling) | post-MVP |
-| Jellyfin integration (NFO, layout, excluding `.browser/`) | post-MVP, independent of subscriptions |
-| Library on network storage (NFS, SMB, NAS) | post-MVP, not supported ([criteria](docs/storage-decisions.md)) |
-| Advanced organization and community (Phases 5 and 6) | post-MVP |
-| Platform cookies | deferred as long as anonymous downloads work |
+- **Download by URL** in the background, with progress, retries and recovery after a crash.
+- **A safe archive:** each video is kept with its metadata (`.info.json`), thumbnail and
+  SHA-256 checksum, in a folder layout readable without VHS. Files are added only when
+  complete, and VHS never writes where its library folder is missing.
+- **Pick up where you left off.** VHS remembers how far you got in every video: the
+  player resumes from there, and a yellow bar under each thumbnail shows your progress
+  across the whole library.
+- **Play in the browser,** with seeking. Videos the browser cannot play are adapted; the
+  original file is never modified.
+- **Organize** with personal tags and ordered collections, separate from the platform's
+  own tags and playlists.
+- **Search and filter** by title, description, channel, tag or collection.
+- **Verify, back up and restore** the library and the database with one command each.
+- **Runs anywhere Docker does:** a Linux server, a NAS that runs Docker or a home
+  computer, also over plain HTTP on a trusted local network.
 
-Source channels remain metadata and a Library filter; collections are never
-created automatically from channels or playlists. Details in §39 of
-[architecture.md](docs/architecture.md).
+**Where you left off, at a glance:** the yellow bar under a thumbnail is how much of it you
+have watched.
 
-## Documentation
+![Library cards with a yellow progress bar under the thumbnails of the videos already started](docs/images/resume.jpg)
 
-- **[Installing VHS](docs/installation.md)**: for users. Requirements, tested
-  environments, video folder, configuration, startup, HTTPS, library verification,
-  backup and restore, updates.
-- **[Developing VHS](docs/development.md)**: for people who work on the code. Development
-  environment, player, tests, full test stack.
-- [Architecture](docs/architecture.md), [conventions](docs/conventions.md) and
-  [storage and backup decisions](docs/storage-decisions.md).
-- [Contributing](CONTRIBUTING.md) and [reporting a security problem](SECURITY.md).
+<details>
+<summary><strong>More screenshots</strong>: playback, collections, downloads</summary>
 
-In short, an installation is a folder for the videos, a PostgreSQL database and
-four Docker containers:
+**Watching a video**: Sintel resumes at 6:13, where it was left, with its personal tags
+and collections:
+
+![A video playing, with its personal tags and collections](docs/images/video.jpg)
+
+**A collection** in the order you choose:
+
+![An ordered collection of videos](docs/images/collection.jpg)
+
+**Downloads** in progress and the history:
+
+![A download in progress and the download history](docs/images/downloads.jpg)
+
+</details>
+
+## Under the hood
+
+VHS is a small project built like a system meant to last: every choice below is
+documented, and most are enforced by tests.
+
+- **API-first.** The Vue interface is just one client of a REST API (`/api/v1/`, with an
+  OpenAPI description), so other clients can follow.
+- **Clear layers with enforced boundaries.** API, services, background tasks, the
+  download engine and storage each have one job. The engine does not depend on Django,
+  and a test fails if it ever does.
+- **Your files come first.** Downloads are written to a work area and promoted with an
+  atomic hard link that never overwrites anything; each file is checksummed. VHS writes
+  only into a library folder marked as its own, never deletes your files automatically,
+  and its verification is read-only.
+- **Recovers by itself.** Every task can be run again safely; heartbeats and a
+  reconciliation every 5 minutes resume interrupted work and clean up after a crash.
+- **Protected media.** Django checks who may watch; Nginx streams the file with
+  `X-Accel-Redirect`, so seeking is fast. Symbolic links are refused at both levels,
+  verified end to end.
+- **No lock-in.** The library is plain folders (platform, channel, date and title) with
+  the original metadata in `.info.json` files: it stays readable without VHS.
+- **Tested and documented.** 350+ backend tests (media integration with ffmpeg
+  included), frontend tests and lint run on every change in CI; installs are verified on
+  real Linux systems. The [architecture](docs/architecture.md) and the
+  [storage decisions](docs/storage-decisions.md) record the reasons, the trade-offs and
+  what was tried and set aside.
+- **Ready for other languages.** All interface texts go through i18n; English is the
+  first language.
+
+## Quick start
+
+You need Docker with Compose 5.4 or later and git; rsync for backups
+([requirements](docs/installation.md#requirements)).
 
 ```bash
 git clone https://github.com/rocchidavide/vhs.git && cd vhs
 ```
 
-Then prepare the video folder and the `.env` as described in
-[installation.md](docs/installation.md), and start with `./vhs start`. From then
-on, `./vhs` gathers the everyday commands (`./vhs help`).
+```bash
+sudo mkdir -p /srv/vhs/library && sudo chown 1000:1000 /srv/vhs/library
+```
+
+```bash
+cp .env.example .env
+```
+
+Edit `.env` (secret key, addresses, database password), then:
+
+```bash
+./vhs start
+```
+
+```bash
+./vhs create-user
+```
+
+and open `http://<your-server>/`. The [installation guide](docs/installation.md) explains
+every step, HTTPS, backups and updates; VHS has been tested on Ubuntu Server 26.04,
+Linux Mint 22.2 and macOS ([tested environments](docs/installation.md#tested-environments)).
+
+## Roadmap
+
+VHS 0.1.0 covers on-demand downloads, the library, playback, local organization, file
+verification and backups. Planned next: more platforms besides YouTube, subscriptions to
+channels and playlists, Jellyfin integration, network storage (NFS, SMB, NAS) and more
+automation. Details and decisions are in §39 of [architecture.md](docs/architecture.md).
+
+## Documentation
+
+- **[Installing VHS](docs/installation.md)**: requirements, tested environments,
+  configuration, HTTPS, library verification, backup and restore, updates.
+- **[Developing VHS](docs/development.md)**: the development environment (everything runs
+  in containers, through `./dev`), tests, debugging, translations.
+- [Architecture](docs/architecture.md), [conventions](docs/conventions.md) and
+  [storage and backup decisions](docs/storage-decisions.md).
+
+## Contributing
+
+Bug reports, ideas and pull requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md).
+To report a security problem, see [SECURITY.md](SECURITY.md).
 
 ## Responsible use
 
@@ -69,3 +144,8 @@ affiliated with YouTube or any other platform.
 ## License
 
 VHS is released under the [MIT License](LICENSE).
+
+The screenshots show open movies by the [Blender Foundation](https://studio.blender.org/films/)
+(Big Buck Bunny, Sintel, Tears of Steel, Cosmos Laundromat, Caminandes, Agent 327,
+Spring, Coffee Run, Sprite Fright, Charge), released under Creative Commons Attribution
+licenses.
