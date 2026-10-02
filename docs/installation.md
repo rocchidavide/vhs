@@ -333,3 +333,52 @@ Besides those in step 3, in `.env` you can adjust:
 | `VHS_LOG_LEVEL` | `INFO` | log level |
 | `VHS_TIME_ZONE` | `UTC` | time zone used to display dates, for example `Europe/Rome` (dates are always stored in UTC) |
 | `POSTGRES_DB` / `POSTGRES_USER` | `vhs` | database name and user |
+
+## Troubleshooting
+
+**A download fails with "The platform requires signing in".** The platform asked for a
+login or for proof that the request does not come from a bot; the detail under the error
+often says "Sign in to confirm you're not a bot". VHS downloads without platform cookies
+in this version, so it cannot sign in. Most often the cause is the reputation of the
+server's internet address, not VHS:
+
+- servers in a data center (a VPS, a cloud machine) and VPNs are blocked much more often
+  than a home connection: run VHS at home, or turn the VPN off for the server;
+- many downloads in a short time can trigger the check: wait a while and use **Retry**;
+- the platform may have changed something that yt-dlp has fixed since: update VHS
+  ([Updating VHS](#updating-vhs)), which brings a newer yt-dlp;
+- videos that really require an account (age-restricted, members-only, private) cannot
+  be downloaded yet: support for platform cookies is planned.
+
+**Every download fails with "Network error".** The server cannot reach the platform: check
+its internet connection and DNS. A VPN or firewall on the server, or on the computer that
+runs a virtual machine, can block the containers even when the browser works.
+
+**`./vhs start` fails with "permission denied" on `docker.sock`.** Your user cannot run
+Docker without `sudo`: add it to the `docker` group ([Requirements](#requirements)), then
+log out and back in.
+
+**The page opens, but sign-in fails with "Sign-in failed. Try again shortly."** If the API
+answers "Bad Request (400)" (for example at `http://<address>/api/v1/health`), the address
+you used to open VHS is not in `DJANGO_ALLOWED_HOSTS`: add the name or IP address to
+`.env`, together with its origin in `DJANGO_CSRF_TRUSTED_ORIGINS`, and run `./vhs start`
+again.
+
+**Sign-in keeps failing with "Your session has expired".** You are using plain HTTP with
+secure cookies: set `DJANGO_SECURE_COOKIES=false` and use `http://` addresses in
+`DJANGO_CSRF_TRUSTED_ORIGINS`, or switch to HTTPS
+([HTTPS or HTTP on a local network](#https-or-http-on-a-local-network)).
+
+**The "Library not available." warning appears.** VHS cannot find its library folder, or
+the folder is not the one it knows: see [The library](#the-library). Nothing is written
+until it is back.
+
+**A download fails with "Storage error" and "Not enough space".** The library disk does not
+have room for the video plus the reserve set by `VHS_MIN_FREE_BYTES`: free some space or
+lower the reserve ([Settings](#settings)).
+
+**A video does not play.** Open its page: if the browser copy is not ready, press
+**"Prepare for playback"** to convert it (the original file is not changed).
+
+If none of this helps, open an issue with the VHS version, how you installed it and the
+error shown on the Downloads page.
