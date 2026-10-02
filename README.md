@@ -45,6 +45,7 @@ created automatically from channels or playlists. Details in §39 of
   environment, player, tests, full test stack.
 - [Architecture](docs/architecture.md), [conventions](docs/conventions.md) and
   [storage and backup decisions](docs/storage-decisions.md).
+- [Contributing](CONTRIBUTING.md) and [reporting a security problem](SECURITY.md).
 
 In short, an installation is a folder for the videos, a PostgreSQL database and
 four Docker containers:
@@ -56,6 +57,13 @@ git clone https://github.com/rocchidavide/vhs.git && cd vhs
 Then prepare the video folder and the `.env` as described in
 [installation.md](docs/installation.md), and start with `./vhs start`. From then
 on, `./vhs` gathers the everyday commands (`./vhs help`).
+
+## Responsible use
+
+VHS is meant for a personal archive of videos you are allowed to keep. You are responsible
+for what you download and how you use it: respect the terms of service of the platforms
+and the rights of the content owners. VHS does not redistribute content and is not
+affiliated with YouTube or any other platform.
 
 ## License
 
