@@ -10,6 +10,15 @@ the ones in VHS stay yours, on a server at home.
 
 YouTube is the first supported platform; VHS is built to support more.
 
+> [!NOTE]
+> **VHS is an early release (0.1).** It does one thing well: archive and play the videos
+> you choose. Many features are deliberately not built yet (other platforms, playlist and
+> channel subscriptions, platform cookies, Jellyfin integration), because what comes next
+> should depend on what people actually need. If you try VHS, tell me what is missing or
+> getting in your way in [Discussions](https://github.com/rocchidavide/vhs/discussions/categories/ideas);
+> report bugs as [issues](https://github.com/rocchidavide/vhs/issues). See the
+> [roadmap](#roadmap) for what is planned.
+
 ![The VHS library: video thumbnails with personal tags, filters by channel, tag and collection](docs/images/library.jpg)
 
 ## Features
@@ -116,9 +125,10 @@ Linux Mint 22.2 and macOS ([tested environments](docs/installation.md#tested-env
 ## Roadmap
 
 VHS 0.1.0 covers on-demand downloads, the library, playback, local organization, file
-verification and backups. Planned next: more platforms besides YouTube, subscriptions to
-channels and playlists, Jellyfin integration, network storage (NFS, SMB, NAS) and more
-automation. Details and decisions are in §39 of [architecture.md](docs/architecture.md).
+verification and backups. Planned next: more platforms besides YouTube, platform cookies,
+subscriptions to channels and playlists, Jellyfin integration, network storage (NFS, SMB,
+NAS) and more automation. Details and decisions are in §39 of
+[architecture.md](docs/architecture.md).
 
 ## Documentation
 
@@ -131,7 +141,8 @@ automation. Details and decisions are in §39 of [architecture.md](docs/architec
 
 ## Contributing
 
-Bug reports, ideas and pull requests are welcome: see [CONTRIBUTING.md](CONTRIBUTING.md).
+Ideas and questions are welcome in [Discussions](https://github.com/rocchidavide/vhs/discussions),
+bug reports and pull requests as described in [CONTRIBUTING.md](CONTRIBUTING.md).
 To report a security problem, see [SECURITY.md](SECURITY.md).
 
 ## Responsible use

@@ -2,8 +2,11 @@
 
 Thanks for your interest! Bug reports, ideas and pull requests are welcome.
 
-- **Bugs and ideas:** open an issue. For a bug, include the VHS version, how you installed
-  it and the steps to reproduce it.
+- **Ideas, feature requests and questions:** start a discussion in
+  [Discussions](https://github.com/rocchidavide/vhs/discussions) (Ideas or Q&A). What comes
+  next in VHS depends on this feedback.
+- **Bugs:** open an issue, with the VHS version, how you installed it and the steps to
+  reproduce it.
 - **Larger changes:** open an issue first to discuss the approach, so that no work goes
   into a direction that does not fit the project.
 - **Security problems:** do not open a public issue; see [SECURITY.md](SECURITY.md).
