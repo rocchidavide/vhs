@@ -1,0 +1,126 @@
+# Checks every push to main and every pull request: the same checks as ./dev test,
+# ./dev test-frontend and ./dev lint, plus the production images and the Nginx symlink check
+# (docs/development.md). Runs on GitHub's standard Ubuntu x86_64 runners.
+
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+# A newer push to the same branch or pull request cancels the run still in progress.
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (ruff, pytest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: vhs
+          POSTGRES_USER: vhs
+          POSTGRES_PASSWORD: vhs
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U vhs -d vhs"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      POSTGRES_HOST: localhost
+    steps:
+      - uses: actions/checkout@v7
+
+      # ffmpeg and ffprobe: without them the media integration tests are skipped.
+      - name: Install ffmpeg
+        run: sudo apt-get update -qq && sudo apt-get install -y -qq --no-install-recommends ffmpeg
+
+      - uses: astral-sh/setup-uv@v10.2.0  # this action publishes full version tags only
+        with:
+          enable-cache: true
+
+      - name: Install dependencies
+        run: uv sync --frozen
+
+      - name: Ruff
+        run: |
+          uv run ruff check .
+          uv run ruff format --check .
+
+      - name: Pytest
+        run: uv run pytest
+
+  frontend:
+    name: Frontend (lint, type-check, tests, build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: npm ci
+
+      # The lint scripts fix what they can: a fix left in the tree means the code was not linted.
+      - name: Lint
+        run: |
+          npm run lint
+          git diff --exit-code
+
+      - name: Type-check
+        run: npm run type-check
+
+      - name: Unit tests
+        run: npm run test:unit -- --run
+
+      - name: Build
+        run: npm run build-only
+
+  images:
+    name: Production images and Nginx symlink check
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - name: Build the backend image (prod)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile.backend
+          target: prod
+          push: false
+          cache-from: type=gha,scope=backend
+          cache-to: type=gha,scope=backend,mode=max
+
+      - name: Build the Nginx image (SPA)
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile.nginx
+          push: false
+          cache-from: type=gha,scope=nginx
+          cache-to: type=gha,scope=nginx,mode=max
+
+      - name: Nginx never serves a symlink from the library
+        run: scripts/check-nginx-symlinks.sh
