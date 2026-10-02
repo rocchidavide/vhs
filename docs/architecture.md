@@ -2265,6 +2265,24 @@ a test on real NFS with an independent test mount and an isolated database, and 
 on the unresponsive NAS. It can be tackled together with the Jellyfin integration, which
 shares the library.
 
+## Other platforms (post-MVP)
+
+VHS is meant to archive videos from several platforms; YouTube is the first one. The
+structure is already there: yt-dlp supports many sites, metadata is mapped by a
+per-platform extractor (`engine/extractors/`), identity is `(platform, platform_id)` and
+the library has one folder per platform. Each new platform is enabled explicitly, never
+by accepting any URL yt-dlp understands. It needs:
+
+- its value in `Platform` (`core/models/platform.py`), with a migration;
+- URL normalization for its hosts (`engine/urls.py`), so that deduplication works;
+- its metadata extractor (channel, upload date, platform metadata) and tests with a
+  recorded `.info.json`;
+- adding it to the extractors yt-dlp may use (`allowed_extractors` in
+  `engine/downloader/ytdlp.py`);
+- a check of its formats against the HTML5 playback policy (§18, §24).
+
+Which platforms come first is not decided yet: it depends on what users ask for.
+
 ## Phase 4 — Channel and playlist subscriptions (post-MVP)
 
 Subscriptions to the source's channels and playlists, with download of the archive and

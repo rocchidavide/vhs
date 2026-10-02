@@ -26,6 +26,7 @@ In the MVP, videos enter VHS only through a URL requested by the user.
 | Installation and development guides | MVP, written |
 | License for the first release | MVP, done (MIT) |
 | Metrics and advanced automation (Phase 3) | post-MVP |
+| Other platforms besides YouTube | post-MVP |
 | Subscriptions to channels and playlists (full archive, polling) | post-MVP |
 | Jellyfin integration (NFO, layout, excluding `.browser/`) | post-MVP, independent of subscriptions |
 | Library on network storage (NFS, SMB, NAS) | post-MVP, not supported ([criteria](docs/storage-decisions.md)) |
