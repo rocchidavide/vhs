@@ -239,9 +239,21 @@ the library is not initialized yet: this is normal.
 
 ## Backup and restore
 
-The database and the video folder must be backed up **together**: the database alone
-does not rebuild the videos, and the folder alone does not rebuild the video records,
-tags, collections and progress. Two scripts do this consistently. On Linux run them
+The database and the video folder must be backed up **together**: each holds data the
+other cannot rebuild.
+
+| Data | Where it is stored | Restored from |
+|---|---|---|
+| Video files, thumbnails, `.info.json` metadata, browser copies (`.browser/`) | the library folder | the copy of the library |
+| Video records (titles, checksums, playback analysis), **personal tags, collections, watch progress**, users, download history | the PostgreSQL database | the database dump only |
+| Secret key, passwords and settings | `.env` | not included in the backup: keep a copy of `.env` separately |
+
+**VHS 0.1 cannot rebuild the database from the library folder.** Without the database
+dump, the videos and their `.info.json` files stay usable (they are plain files, readable
+without VHS), but personal tags, collections and watch progress are lost. The `.info.json`
+files keep the platform's full original metadata (title, description, channel, upload
+date, tags), so each video stays identifiable even without VHS. The two scripts
+below always save and restore the database and the library together. On Linux run them
 with `sudo`, so that the copy preserves the file owners.
 
 ### Backup
