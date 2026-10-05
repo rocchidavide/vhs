@@ -57,6 +57,11 @@ ThumbnailCallback = Callable[[Path], None]
 
 
 class BaseDownloader(ABC):
+    @property
+    def version(self) -> str:
+        """Version of the download tool, recorded with every attempt; empty if unknown."""
+        return ""
+
     @abstractmethod
     def extract_info(self, url: str) -> dict:
         """Return raw metadata for a single video without downloading it."""

@@ -6,6 +6,7 @@ from pathlib import Path
 
 import yt_dlp
 from yt_dlp.utils import DownloadError, ExtractorError, PostProcessingError
+from yt_dlp.version import __version__ as YTDLP_VERSION
 
 from engine.downloader.base import (
     ActivityCallback,
@@ -122,6 +123,11 @@ class YTDLPDownloader(BaseDownloader):
     def __init__(self, format_selector: str = DEFAULT_FORMAT, extra_options: dict | None = None):
         self.format_selector = format_selector
         self.extra_options = extra_options or {}
+
+    @property
+    def version(self) -> str:
+        # The version actually imported: the emergency update may override the image's one.
+        return YTDLP_VERSION
 
     def _options(self, **overrides) -> dict:
         options = {

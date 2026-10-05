@@ -129,6 +129,8 @@ def test_execute_archives_the_file(service, storage, fake_downloader):
     assert download.completed_at is not None
     assert download.last_progress_at is not None
     assert video.local_status == LocalStatus.AVAILABLE
+    # Each attempt records the version of the download tool that ran it.
+    assert download.ytdlp_version == fake_downloader.version
     # The size of the archived file, not the estimate made before downloading.
     assert video.file_size == len(fake_downloader.content)
     assert download.total_bytes == download.downloaded_bytes == video.file_size

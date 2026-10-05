@@ -75,6 +75,10 @@ class FakeDownloader(BaseDownloader):
         self.on_thumbnail_probe = lambda: None
         self.thumbnail_seen_during_download = None
 
+    @property
+    def version(self) -> str:
+        return "2026.1.2-test"
+
     def extract_info(self, url: str) -> dict:
         self.extract_calls.append(url)
         if self.extract_error:

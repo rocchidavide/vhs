@@ -37,7 +37,14 @@
     "systemStatus": "System status",
     "unreachable": "Backend unreachable",
     "status": "API: {api} · Database: {database} · Library: {storage}",
-    "checking": "Checking…"
+    "checking": "Checking…",
+    "versionsTitle": "Versions",
+    "versions": "VHS {vhs} · yt-dlp {ytdlp} · deno {deno}",
+    "ytdlpAutoUpdate": "yt-dlp is installed again at every start (emergency option VHS_YTDLP_AUTO_UPDATE): this version was not tested with VHS.",
+    "updateAvailable": "VHS {version} is available.",
+    "releaseNotes": "Release notes",
+    "howToUpdate": "Make a backup, then update with ./vhs update.",
+    "unknownVersion": "unknown"
   },
   "storage": {
     "unavailable": "Library not available.",
@@ -97,7 +104,8 @@
       "playlist": "Playlists and channels are not supported",
       "interrupted": "Download interrupted",
       "unknown": "Unexpected error"
-    }
+    },
+    "ytdlpVersion": "yt-dlp {version}"
   },
   "library": {
     "title": "Library",

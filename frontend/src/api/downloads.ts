@@ -36,6 +36,8 @@ export interface Download {
   eta: number | null
   error_code: string
   error_message: string
+  /** yt-dlp version that ran this attempt (empty before VHS 0.1.1). */
+  ytdlp_version: string
   is_stalled: boolean
   created_at: string
   started_at: string | null

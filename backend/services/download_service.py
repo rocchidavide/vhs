@@ -199,6 +199,7 @@ class DownloadService:
             last_heartbeat_at=now,
             error_code="",
             error_message="",
+            ytdlp_version=self.downloader.version[:32],
         )
         if not claimed:
             logger.info("download %s is not queued, nothing to do", download_id)
