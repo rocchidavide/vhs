@@ -2726,6 +2726,22 @@ This makes it possible to test them and potentially reuse them independently of 
 
 ---
 
+## Decision: Dependency and yt-dlp updates
+
+Dependencies, yt-dlp included, have fixed versions (`uv.lock`, pinned base images): every
+installation of a release runs the combination the CI tested. Dependabot proposes updates as
+pull requests (Python daily, yt-dlp separately); a yt-dlp fix for a platform change becomes
+a patch release. Installations learn about new releases from the Home page (an update check
+against GitHub, at most twice a day, which can be turned off).
+
+As an emergency option, off by default, `VHS_YTDLP_AUTO_UPDATE` installs the latest yt-dlp
+at container start, for when a platform breaks downloads before a release is out. It is
+not the default because an untested yt-dlp may need newer tools than the image has (deno,
+for example) or bring its own regressions, and installations would no longer be
+reproducible.
+
+---
+
 ## Decision: Abstract storage
 
 The domain does not know the concrete filesystem.
@@ -2749,7 +2765,6 @@ Other backends may be added in the future if a real use case arises.
 - import of existing archives and the related `ImportJob` model, if needed;
 - custom naming templates;
 - advanced backoff strategy beyond the v1 minimum retry limits;
-- automation of yt-dlp updates;
 - advanced quality and conversion profiles beyond the v1 base policy;
 - configurable parallelism beyond the v1 safe limit;
 - auto-pause on insufficient space beyond the v1 preventive check;

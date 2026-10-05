@@ -312,6 +312,16 @@ It asks for confirmation, downloads the new version (`git pull`) and rebuilds th
 images (`docker compose up -d --build`). Database migrations are applied
 automatically at startup.
 
+**Knowing when to update.** The Home page shows the versions of VHS and yt-dlp, and announces
+a newer VHS release with a link to its notes. To find out, the server asks GitHub's public
+API for the latest release at most twice a day. The request carries only the VHS version
+(in its User-Agent header); like any request, it shows GitHub the server's IP address. Set
+`VHS_UPDATE_CHECK=false` to turn this off.
+
+New VHS releases often carry a newer yt-dlp: when a platform changes something and
+downloads break, a fixed yt-dlp reaches VHS as a regular release, tested with the rest of
+VHS. Updating regularly keeps downloads working.
+
 ## Stopping and restarting
 
 ```bash
@@ -344,6 +354,8 @@ Besides those in step 3, in `.env` you can adjust:
 | `VHS_TASK_RETRY` | `22500` | seconds before an unacknowledged job is handed out again; must exceed `VHS_TASK_TIMEOUT` |
 | `VHS_LOG_LEVEL` | `INFO` | log level |
 | `VHS_TIME_ZONE` | `UTC` | time zone used to display dates, for example `Europe/Rome` (dates are always stored in UTC) |
+| `VHS_UPDATE_CHECK` | `true` | ask GitHub for the latest VHS release, at most twice a day, to announce it on the Home page |
+| `VHS_YTDLP_AUTO_UPDATE` | `false` | emergency only: install the latest yt-dlp at every start ([Troubleshooting](#troubleshooting)) |
 | `POSTGRES_DB` / `POSTGRES_USER` | `vhs` | database name and user |
 
 ## Troubleshooting
@@ -361,6 +373,15 @@ server's internet address, not VHS:
   ([Updating VHS](#updating-vhs)), which brings a newer yt-dlp;
 - videos that really require an account (age-restricted, members-only, private) cannot
   be downloaded yet: support for platform cookies is planned.
+
+**Downloads started failing after a platform change, with "Unexpected error" or "Network
+error" on videos that used to work.** The platform probably changed something that only a
+newer yt-dlp handles. Update VHS ([Updating VHS](#updating-vhs)): the Home page and each
+failed download show the yt-dlp version in use. If no VHS release with a fix is out yet, you
+can turn on the emergency option `VHS_YTDLP_AUTO_UPDATE=true` in `.env` and run
+`./vhs start`: the backend and the worker then install the latest yt-dlp at every start.
+That version has not been tested with VHS, and the Home page says so; turn the option off
+again once a VHS release with the fix is out.
 
 **Every download fails with "Network error".** The server cannot reach the platform: check
 its internet connection and DNS. A VPN or firewall on the server, or on the computer that
