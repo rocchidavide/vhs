@@ -1,0 +1,58 @@
+# Dependency updates (CONTRIBUTING.md, "Releasing"). Every update arrives as a pull request
+# that the CI checks before it is merged.
+#
+# Python dependencies are checked daily: yt-dlp follows YouTube's changes closely, and a
+# fixed release should reach VHS within days. yt-dlp gets a pull request of its own, so it
+# can be merged and released on its own.
+
+version: 2
+
+updates:
+  - package-ecosystem: uv
+    directory: /
+    schedule:
+      interval: daily
+    groups:
+      yt-dlp:
+        patterns: ["yt-dlp"]
+      python:
+        patterns: ["*"]
+        exclude-patterns: ["yt-dlp"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: npm
+    directory: /frontend
+    schedule:
+      interval: weekly
+    groups:
+      frontend:
+        patterns: ["*"]
+        update-types: [minor, patch]
+
+  - package-ecosystem: docker
+    directory: /docker
+    schedule:
+      interval: weekly
+    groups:
+      docker-images:
+        patterns: ["*"]
+
+  # PostgreSQL: patch releases of the same major version only. A new major version changes
+  # the data format and needs a dump and restore (docs/installation.md).
+  - package-ecosystem: docker-compose
+    directory: /
+    schedule:
+      interval: weekly
+    ignore:
+      - dependency-name: postgres
+        update-types: [version-update:semver-major]
+      # Images built from this repository, not pulled from a registry.
+      - dependency-name: "vhs-*"
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns: ["*"]
