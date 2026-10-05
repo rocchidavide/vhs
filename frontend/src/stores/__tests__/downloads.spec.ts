@@ -15,6 +15,7 @@ function download(id: number, status: DownloadStatus): Download {
     eta: null,
     error_code: '',
     error_message: '',
+    ytdlp_version: '',
     is_stalled: false,
     created_at: '2026-01-01T00:00:00Z',
     started_at: null,

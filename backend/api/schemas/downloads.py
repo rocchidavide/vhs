@@ -37,6 +37,7 @@ class DownloadOut(Schema):
     eta: int | None
     error_code: str
     error_message: str
+    ytdlp_version: str
     is_stalled: bool
     created_at: datetime
     started_at: datetime | None

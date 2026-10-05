@@ -107,6 +107,9 @@ const stalledMinutes = computed(() =>
         <div v-if="download.status === 'failed'" class="error">
           <strong>{{ errorLabel }}</strong>
           <span v-if="download.error_message">{{ download.error_message }}</span>
+          <span v-if="download.ytdlp_version" class="tool">
+            {{ t('downloads.ytdlpVersion', { version: download.ytdlp_version }) }}
+          </span>
         </div>
       </template>
     </div>
@@ -217,6 +220,10 @@ h3 {
 
 .error span {
   color: var(--color-text-muted);
+}
+
+.error .tool {
+  font-size: 0.75rem;
 }
 
 @media (max-width: 720px) {

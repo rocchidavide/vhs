@@ -36,6 +36,9 @@ class Download(models.Model):
     eta = models.PositiveIntegerField(null=True, blank=True)
     error_code = models.CharField(max_length=32, blank=True)
     error_message = models.TextField(blank=True)
+    # Version of the download tool that ran this attempt (empty for attempts made before
+    # VHS 0.1.1): a failed download says which yt-dlp it failed with.
+    ytdlp_version = models.CharField(max_length=32, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     enqueued_at = models.DateTimeField(null=True, blank=True)

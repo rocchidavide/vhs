@@ -9,6 +9,7 @@ from api.channels import router as channels_router
 from api.collections import router as collections_router
 from api.downloads import router as downloads_router
 from api.health import router as health_router
+from api.system import router as system_router
 from api.tags import router as tags_router
 from api.videos import router as videos_router
 
@@ -22,6 +23,7 @@ api = NinjaAPI(
 )
 
 api.add_router("/health", health_router, tags=["health"])
+api.add_router("/system", system_router, tags=["system"])
 api.add_router("/auth", auth_router, tags=["auth"])
 api.add_router("/downloads", downloads_router, tags=["downloads"])
 api.add_router("/videos", videos_router, tags=["videos"])

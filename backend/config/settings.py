@@ -141,6 +141,11 @@ STATIC_ROOT = env_path("DJANGO_STATIC_ROOT", PROJECT_DIR / "staticfiles")
 # Video library: a local folder, a Docker volume or a host folder (docs/storage-decisions.md).
 VHS_MEDIA_ROOT = env_path("VHS_MEDIA_ROOT", PROJECT_DIR / "video-library")
 VHS_NAMING_TEMPLATE = env("VHS_NAMING_TEMPLATE", "standard")
+# Ask GitHub, at most twice a day, whether a newer VHS release exists (shown on the Home
+# page to signed-in users). Turn it off to make no request at all.
+VHS_UPDATE_CHECK = env_bool("VHS_UPDATE_CHECK", True)
+# Emergency option: install the latest yt-dlp at container start (docker/entrypoint.sh).
+VHS_YTDLP_AUTO_UPDATE = env_bool("VHS_YTDLP_AUTO_UPDATE", False)
 # Nginx internal location that maps to VHS_MEDIA_ROOT (X-Accel-Redirect).
 VHS_MEDIA_ACCEL_PREFIX = env("VHS_MEDIA_ACCEL_PREFIX", "/media-internal/")
 
