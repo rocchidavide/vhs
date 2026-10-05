@@ -2,6 +2,12 @@
 #   prod  what users run (docker-compose.yml): dependencies and code baked in
 #   dev   development (docker-compose.dev.yml): dev dependencies too, the code is mounted
 
+# Tools copied into the image, with fixed versions so that every build is the same
+# (Dependabot updates them, .github/dependabot.yml).
+FROM ghcr.io/astral-sh/uv:0.12.23 AS uv
+# JavaScript runtime required by yt-dlp for YouTube.
+FROM denoland/deno:bin-2.9.7 AS deno
+
 FROM python:3.13-slim AS base
 
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -15,9 +21,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
-COPY --from=ghcr.io/astral-sh/uv:latest /uv /usr/local/bin/uv
-# JavaScript runtime required by yt-dlp for YouTube.
-COPY --from=denoland/deno:bin /deno /usr/local/bin/deno
+COPY --from=uv /uv /usr/local/bin/uv
+COPY --from=deno /deno /usr/local/bin/deno
 
 RUN useradd --create-home --uid 1000 vhs \
     && mkdir -p /srv/video-library /srv/static \
