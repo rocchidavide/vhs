@@ -83,6 +83,7 @@ which in turn refuses to start with the development `.env`.
 |---|---|---|
 | Start the environment | `./dev start` | `docker compose up -d` |
 | Stop it | `./dev stop` | `docker compose stop` |
+| Restart all services or one | `./dev restart [service]` | `docker compose restart [service]` |
 | See the services | `./dev status` | `docker compose ps` |
 | Follow the logs | `./dev logs [service]` | `docker compose logs -f [service]` |
 | Rebuild the images | `./dev build` | `docker compose up -d --build` |
@@ -103,8 +104,9 @@ Migrations are also applied on every `./dev start`, by the
 **When you need to rebuild the images** (`./dev build`): only
 if the dependencies (`pyproject.toml`/`uv.lock`) or the Dockerfiles change. Not for
 code. If `frontend/package-lock.json` changes, restarting the
-`frontend` service is enough (`docker compose restart frontend`): it runs
-`npm install` at startup.
+`frontend` service is enough (`./dev restart frontend`): it runs
+`npm install` at startup. A restart does not reread `.env`: after changing it, run
+`./dev start`, which recreates the containers whose configuration changed.
 
 **`down` and `down -v`:** `docker compose down` removes the containers and touches
 neither the database nor the videos. `down -v` **deletes the development database**.

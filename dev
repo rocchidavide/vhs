@@ -25,6 +25,7 @@ Usage: ./dev <command> [arguments]
 
   start               start the environment (http://localhost:8081)
   stop                stop the environment (data and videos are kept)
+  restart [service]   restart all services or one (to apply a changed .env, use start)
   status              show the services
   logs [service]      follow the logs (all services or one)
   build               rebuild the images and restart (after changing dependencies or Dockerfiles)
@@ -52,6 +53,10 @@ case "$command" in
 
   stop)
     run docker compose stop
+    ;;
+
+  restart)
+    run docker compose restart "$@"
     ;;
 
   status)
