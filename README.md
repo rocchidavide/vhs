@@ -117,12 +117,17 @@ documented, and most are enforced by tests.
 
 ## Quick start
 
-You need Docker with Compose 5.4 or later and git; rsync for backups
-([requirements](docs/installation.md#requirements)).
+You need Docker with Compose 5.4 or later, curl and tar; rsync for backups
+([requirements](docs/installation.md#requirements)). On the server, download the latest
+release into a new folder:
 
 ```bash
-git clone https://github.com/rocchidavide/vhs.git && cd vhs
+mkdir vhs && cd vhs
+curl -fsSL https://github.com/rocchidavide/vhs/releases/latest/download/vhs.tar.gz | tar xz
 ```
+
+(or [download vhs.tar.gz](https://github.com/rocchidavide/vhs/releases/latest/download/vhs.tar.gz)
+and extract it on your server). Then prepare the video folder:
 
 ```bash
 sudo mkdir -p /srv/vhs/library && sudo chown 1000:1000 /srv/vhs/library

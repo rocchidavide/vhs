@@ -25,7 +25,7 @@ A VHS installation is made of:
   (`sudo usermod -aG docker $USER`), then log out and back in. Check with `docker ps`.
   Members of the `docker` group have root-level control of the machine: add only
   trusted users.
-- **git**, to download and update VHS.
+- **curl** and **tar**, to download VHS and its updates (most systems have them).
 - **rsync**, for backups.
 - Disk space for the videos: the library folder must be on the server's own disk.
 
@@ -50,15 +50,26 @@ production images): see the CI in `.github/workflows/ci.yml`.
 
 ## 1. Download VHS
 
+Create a folder for VHS, for example in your home folder, and download the latest release
+into it:
+
 ```bash
-git clone https://github.com/rocchidavide/vhs.git
+mkdir vhs && cd vhs
 ```
 
 ```bash
-cd vhs
+curl -fsSL https://github.com/rocchidavide/vhs/releases/latest/download/vhs.tar.gz | tar xz
 ```
 
-All the commands in this guide are run from this folder.
+All the commands in this guide are run from this folder. It holds only a few files: the
+`./vhs` command, the Compose files, the configuration template and the backup scripts. VHS
+itself comes as ready-made images, which Docker downloads at the first start. Without
+`curl`, download `vhs.tar.gz` from the
+[latest release](https://github.com/rocchidavide/vhs/releases/latest) and extract it into
+the folder on the server.
+
+Do not edit the files of the release: `./vhs update` replaces them. Your settings all go
+in `.env` (step 3).
 
 ## 2. Prepare the video folder
 
@@ -122,8 +133,8 @@ backups do not include it.
 ./vhs start
 ```
 
-On the first start the images are built and the database tables are created (this
-takes a few minutes). Then create the user to sign in with:
+On the first start Docker downloads the VHS images (a few hundred MB) and the database
+tables are created. Then create the user to sign in with:
 
 ```bash
 ./vhs create-user
@@ -151,7 +162,7 @@ commands that delete data, and it refuses to start with the development `.env`.
 | Initialize an existing library | `./vhs init-library` | `… manage.py init_library` |
 | Backup | `sudo ./vhs backup <folder>` | `scripts/backup.sh <folder>` |
 | Restore | `sudo ./vhs restore <backup>` | `scripts/restore.sh <backup>` |
-| Update | `./vhs update` | `git pull` and `docker compose up -d --build` |
+| Update | `./vhs update` | download the latest `vhs.tar.gz`, then `docker compose pull` and `docker compose up -d` |
 | Other Django commands | `./vhs manage <command>` | `… manage.py <command>` |
 
 > `./dev` is **only for people who develop** VHS: in an installation it refuses to
@@ -162,10 +173,10 @@ commands that delete data, and it refuses to start with the development `.env`.
 `DJANGO_SECURE_COOKIES` decides whether session cookies travel only over HTTPS.
 
 - **HTTPS** (recommended): remove the `DJANGO_SECURE_COOKIES=false` line (the default
-  is `true`) and use `https://` addresses in `DJANGO_CSRF_TRUSTED_ORIGINS`. Put the
-  certificate and key in `certs/` (`fullchain.pem`, `privkey.pem`), and uncomment the
-  `./certs:/etc/nginx/certs:ro` line in `docker-compose.prod.yml` and the TLS block in
-  `docker/nginx.conf`.
+  is `true`), use `https://` addresses in `DJANGO_CSRF_TRUSTED_ORIGINS` and set
+  `VHS_HTTPS=true`. Put the certificate and its key in the `certs` folder of VHS, as
+  `fullchain.pem` and `privkey.pem`, then run `./vhs start`. If a file is missing, Nginx
+  does not start and `./vhs logs nginx` says which one.
 - **HTTP on a trusted local network:** `DJANGO_SECURE_COOKIES=false`, otherwise
   sign-in does not work (the browser does not send `Secure` cookies back over HTTP).
 
@@ -308,9 +319,27 @@ Make a backup first, then:
 ./vhs update
 ```
 
-It asks for confirmation, downloads the new version (`git pull`) and rebuilds the
-images (`docker compose up -d --build`). Database migrations are applied
-automatically at startup.
+It downloads the latest release and shows which version it brings, with a link to its
+notes. After you confirm, it replaces the files of the release in the VHS folder (never
+`.env`), downloads the new images (`docker compose pull`) and restarts VHS
+(`docker compose up -d`). Database migrations are applied automatically at startup. If you
+already have the latest release, it changes nothing.
+
+Every installation of the same version runs the same images: those built and tested for
+that release, published on GitHub's container registry (`ghcr.io/rocchidavide`).
+
+**Coming from VHS 0.1.** VHS 0.1 was installed with `git clone` and built its images on the
+server. Its `./vhs update` still works: it downloads the new files with `git pull`, and from
+then on VHS uses the published images and updates as described above. The folder stays a
+copy of the repository, with files VHS no longer uses; it works as it is. To free the space
+of the images built by VHS 0.1, run `docker image rm vhs-backend vhs-nginx` once VHS is
+running again.
+
+If you enabled HTTPS in VHS 0.1, you edited `docker-compose.prod.yml` and
+`docker/nginx.conf`, and `git pull` refuses to overwrite them. Undo those edits with
+`git checkout -- docker-compose.prod.yml docker/nginx.conf`, run `./vhs update` again, then
+set `VHS_HTTPS=true` in `.env` and run `./vhs start`: your certificates in `certs` stay where
+they are.
 
 **Knowing when to update.** The Home page shows the versions of VHS and yt-dlp, and announces
 a newer VHS release with a link to its notes. To find out, the server asks GitHub's public
@@ -354,6 +383,7 @@ Besides those in step 3, in `.env` you can adjust:
 | `VHS_TASK_RETRY` | `22500` | seconds before an unacknowledged job is handed out again; must exceed `VHS_TASK_TIMEOUT` |
 | `VHS_LOG_LEVEL` | `INFO` | log level |
 | `VHS_TIME_ZONE` | `UTC` | time zone used to display dates, for example `Europe/Rome` (dates are always stored in UTC) |
+| `VHS_HTTPS` | `false` | serve VHS over HTTPS too, with the certificate in `certs` ([HTTPS or HTTP on a local network](#https-or-http-on-a-local-network)) |
 | `VHS_UPDATE_CHECK` | `true` | ask GitHub for the latest VHS release, at most twice a day, to announce it on the Home page |
 | `VHS_YTDLP_AUTO_UPDATE` | `false` | emergency only: install the latest yt-dlp at every start ([Troubleshooting](#troubleshooting)) |
 | `POSTGRES_DB` / `POSTGRES_USER` | `vhs` | database name and user |
@@ -382,6 +412,11 @@ can turn on the emergency option `VHS_YTDLP_AUTO_UPDATE=true` in `.env` and run
 `./vhs start`: the backend and the worker then install the latest yt-dlp at every start.
 That version has not been tested with VHS, and the Home page says so; turn the option off
 again once a VHS release with the fix is out.
+
+**The VHS images cannot be downloaded** (`./vhs start` or `./vhs update` stops at
+"pull" with "denied", "not found" or a network error). Check that the server reaches
+`ghcr.io` and that `docker-compose.yml` names a released version. The images are published
+for x86_64 (amd64) and arm64 servers; other architectures are not supported.
 
 **Every download fails with "Network error".** The server cannot reach the platform: check
 its internet connection and DNS. A VPN or firewall on the server, or on the computer that

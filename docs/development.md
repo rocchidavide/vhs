@@ -114,6 +114,12 @@ neither the database nor the videos. `down -v` **deletes the development databas
 To check the resulting configuration of the Compose files (ports, builds,
 mounts), for example after editing them: `./dev check-config`.
 
+**Testing an installation before a release.** An installation pulls the published images
+named in `docker-compose.yml`. To run the production setup with images built from your
+working copy instead, in a separate folder with an installation `.env` (not the development
+one), add `docker-compose.build.yml` to `COMPOSE_FILE` and run `docker compose up -d --build`.
+`scripts/make-bundle.sh` builds the `vhs.tar.gz` of a release, as the release workflow does.
+
 After editing `docker/nginx.conf` or `docker/nginx.dev.conf`, run `./dev check-symlinks`: it
 starts both configs in throwaway containers against a stub backend and checks that no
 symbolic link in the library is served through `/media-internal/`, even when an

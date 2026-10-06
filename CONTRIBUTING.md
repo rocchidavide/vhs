@@ -29,11 +29,25 @@ Dependabot opens pull requests for dependency updates ([.github/dependabot.yml](
 Python every day, with yt-dlp in a pull request of its own, the rest every week.
 
 - A **yt-dlp** update that fixes a platform change is released right away: merge the pull
-  request once the CI is green, then release a patch version (0.1.x).
-- To release: update the version in `pyproject.toml` (then run `uv lock`) and in
-  `frontend/package.json` (and `package-lock.json`), merge to `main`, create an annotated tag
-  (`git tag -a v0.1.2`) and a GitHub release with the notes, marked as the latest release:
-  installations read the latest release to announce the new version on their Home page.
+  request once the CI is green, then release a patch version (0.2.x).
+- Installations run only releases: the images and the `vhs.tar.gz` bundle published for a
+  tag. `main` is where development happens; merging to it reaches nobody until a release.
+
+To release:
+
+1. In a pull request, update the version in `pyproject.toml` (then run `uv lock`), in
+   `frontend/package.json` (and `package-lock.json`) and in the two VHS images of
+   `docker-compose.yml`; a test checks that they agree. Merge it.
+2. Create an annotated tag on that commit and push it (`git tag -a v0.2.1`,
+   `git push origin v0.2.1`). The release workflow
+   ([.github/workflows/release.yml](.github/workflows/release.yml)) builds and publishes the
+   images for x86_64 and arm64, installs VHS from the bundle on both, and creates a **draft**
+   GitHub release with `vhs.tar.gz` attached.
+3. Write the notes in the draft and publish it as the latest release: installations read it
+   to announce the new version on their Home page, and `./vhs update` downloads it.
+
+To test a release before publishing it, push a `vX.Y.Z-rc.N` tag: the workflow publishes
+images under that tag and a pre-release, which installations never see.
 
 By contributing, you agree that your contribution is released under the project's
 [MIT License](LICENSE).
