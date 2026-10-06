@@ -46,8 +46,8 @@ updates:
     ignore:
       - dependency-name: postgres
         update-types: [version-update:semver-major]
-      # Images built from this repository, not pulled from a registry.
-      - dependency-name: "vhs-*"
+      # VHS's own images: their version changes only with a release.
+      - dependency-name: "ghcr.io/rocchidavide/vhs-*"
 
   - package-ecosystem: github-actions
     directory: /

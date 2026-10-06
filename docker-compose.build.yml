@@ -1,0 +1,25 @@
+# Builds the production images from this repository instead of pulling the published ones:
+# to test an installation before a release (docs/development.md). Add it after the other files,
+# for example in .env:
+#   COMPOSE_FILE=docker-compose.yml:docker-compose.prod.yml:docker-compose.build.yml
+# then run "docker compose up -d --build".
+
+x-backend-build: &backend-build
+  build:
+    context: .
+    dockerfile: docker/Dockerfile.backend
+    target: prod
+  image: vhs-backend
+  pull_policy: build
+
+services:
+  migrate: *backend-build
+  backend: *backend-build
+  worker: *backend-build
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/Dockerfile.nginx
+    image: vhs-nginx
+    pull_policy: build
