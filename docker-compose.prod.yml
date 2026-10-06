@@ -1,5 +1,7 @@
 # Production override (restart policies, public ports):
 #   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+# HTTPS: VHS_HTTPS=true in .env, with the certificate in the certs folder (docs/installation.md).
+# Do not edit the files of a release: ./vhs update replaces them; settings go in .env.
 
 services:
   db:
@@ -16,6 +18,8 @@ services:
     ports: !override
       - "80:80"
       - "443:443"
+    environment:
+      VHS_HTTPS: ${VHS_HTTPS:-false}
     volumes:
       - static:/srv/static:ro
-      # - ./certs:/etc/nginx/certs:ro
+      - ./certs:/etc/nginx/certs:ro

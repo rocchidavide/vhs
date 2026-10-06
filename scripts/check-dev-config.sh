@@ -119,6 +119,10 @@ for label, name in (("Installation (docker-compose.yml, .env.example)", "base"),
     expect("nginx: build", "build" in s["nginx"], built)
     image = s["nginx"].get("image", "")
     expect("nginx: image", image if built else image.rsplit(":", 1)[0], "vhs-nginx" if built else REGISTRY + "vhs-nginx")
+    if name != "base":
+        certs = [m for m in mounts(s["nginx"]) if m[2] == "/etc/nginx/certs"]
+        expect("nginx: certs folder read-only", [(m[1].rsplit("/", 1)[-1], m[3]) for m in certs], [("certs", True)])
+        expect("nginx: VHS_HTTPS", s["nginx"].get("environment", {}).get("VHS_HTTPS"), "false")
     lib_mounts = {n: [m[3] for m in mounts(svc) if m[2] == "/srv/video-library"] for n, svc in s.items()}
     expect("library read-only per service", lib_mounts, {"backend": [False], "db": [], "migrate": [False], "nginx": [True], "worker": [False]})
 
