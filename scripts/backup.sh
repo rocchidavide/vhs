@@ -132,10 +132,11 @@ say "Writing the manifest"
 {
   echo "VHS backup"
   echo "Date:               $(date '+%Y-%m-%d %H:%M:%S %z')"
-  echo "VHS commit:         $(git rev-parse --short HEAD 2>/dev/null || echo unknown)"
   manage shell -v 0 -c "
 from django.db.migrations.recorder import MigrationRecorder
 from core.models import LocalStatus, Video
+from services.system_service import vhs_version
+print('VHS version:       ', vhs_version() or 'unknown')
 last = MigrationRecorder.Migration.objects.filter(app='core').order_by('-id').first()
 print('Last migration:    ', last.name if last else '-')
 print('Archived videos:   ', Video.objects.filter(local_status=LocalStatus.AVAILABLE).count())"
