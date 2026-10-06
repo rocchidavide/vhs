@@ -172,7 +172,7 @@ jobs:
           VERSION: ${{ needs.check.outputs.version }}
         run: |
           for _ in $(seq 60); do
-            if curl -fsS http://localhost/api/v1/health; then
+            if curl -fsS http://localhost:1976/api/v1/health; then
               docker compose images
               docker compose images --format json | grep -q "vhs-backend.*$VERSION"
               exit 0

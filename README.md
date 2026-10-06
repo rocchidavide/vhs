@@ -151,7 +151,7 @@ Edit `.env` (secret key, addresses, database password), then:
 ./vhs create-user
 ```
 
-and open `http://<your-server>/`. The [installation guide](docs/installation.md) explains
+and open `http://<your-server>:1976/` (1976: the year VHS tapes came out). The [installation guide](docs/installation.md) explains
 every step, HTTPS, backups and updates; VHS has been tested on Ubuntu Server 26.04,
 Linux Mint 22.2 and macOS ([tested environments](docs/installation.md#tested-environments)).
 

@@ -108,7 +108,7 @@ DJANGO_ALLOWED_HOSTS=vhs.lan,192.168.1.50
 # HTTP on a local network (see "HTTPS or HTTP on a local network"): with HTTPS remove
 # these two lines and use https:// origins
 DJANGO_SECURE_COOKIES=false
-DJANGO_CSRF_TRUSTED_ORIGINS=http://vhs.lan,http://192.168.1.50
+DJANGO_CSRF_TRUSTED_ORIGINS=http://vhs.lan:1976,http://192.168.1.50:1976
 
 # Database password: choose a strong one
 POSTGRES_PASSWORD=replace-with-a-password
@@ -142,8 +142,9 @@ tables are created. Then create the user to sign in with:
 ./vhs create-user
 ```
 
-Open `http://<server-address>/` and sign in. VHS answers on port 80 (and 443, if you
-configure HTTPS).
+Open `http://<server-address>:1976/` and sign in. VHS answers on port 1976, the year VHS
+tapes came out (and on 1977 with HTTPS, at `https://<server-address>:1977/`); to use other
+ports, see `VHS_HTTP_PORT` and `VHS_HTTPS_PORT` in [Settings](#settings).
 
 ## The `./vhs` command
 
@@ -384,6 +385,7 @@ Besides those in step 3, in `.env` you can adjust:
 | `VHS_TASK_TIMEOUT` | `21600` | maximum duration of a download, in seconds |
 | `VHS_TASK_RETRY` | `22500` | seconds before an unacknowledged job is handed out again; must exceed `VHS_TASK_TIMEOUT` |
 | `VHS_LOG_LEVEL` | `INFO` | log level |
+| `VHS_HTTP_PORT` / `VHS_HTTPS_PORT` | `1976` / `1977` | ports of the server where VHS answers; with `VHS_HTTP_PORT=80`, VHS opens at `http://<server-address>/` |
 | `VHS_TIME_ZONE` | `UTC` | time zone used to display dates, for example `Europe/Rome` (dates are always stored in UTC) |
 | `VHS_HTTPS` | `false` | serve VHS over HTTPS too, with the certificate in `certs` ([HTTPS or HTTP on a local network](#https-or-http-on-a-local-network)) |
 | `VHS_UPDATE_CHECK` | `true` | ask GitHub for the latest VHS release, at most twice a day, to announce it on the Home page |
@@ -429,7 +431,7 @@ Docker without `sudo`: add it to the `docker` group ([Requirements](#requirement
 log out and back in.
 
 **The page opens, but sign-in fails with "Sign-in failed. Try again shortly."** If the API
-answers "Bad Request (400)" (for example at `http://<address>/api/v1/health`), the address
+answers "Bad Request (400)" (for example at `http://<address>:1976/api/v1/health`), the address
 you used to open VHS is not in `DJANGO_ALLOWED_HOSTS`: add the name or IP address to
 `.env`, together with its origin in `DJANGO_CSRF_TRUSTED_ORIGINS`, and run `./vhs start`
 again.
