@@ -11,7 +11,7 @@ the ones in VHS stay yours, on a server at home.
 YouTube is the first supported platform; VHS is built to support more.
 
 > [!NOTE]
-> **VHS is an early release (0.1).** It does one thing well: archive and play the videos
+> **VHS is an early release (0.2).** It does one thing well: archive and play the videos
 > you choose. Many features are deliberately not built yet (other platforms, playlist and
 > channel subscriptions, platform cookies, Jellyfin integration), because what comes next
 > should depend on what people actually need. If you try VHS, tell me what is missing or
@@ -107,6 +107,10 @@ documented, and most are enforced by tests.
   verified end to end.
 - **No lock-in.** The library is plain folders (platform, channel, date and title) with
   the original metadata in `.info.json` files: it stays readable without VHS.
+- **Tested releases.** Every release ships ready-made images for x86_64 and arm64, built
+  once and checked by installing VHS from the release on both: every installation of a
+  version runs exactly those images. `./vhs update` moves to the next release without
+  touching your settings.
 - **Tested and documented.** 350+ backend tests (media integration with ffmpeg
   included), frontend tests and lint run on every change in CI; installs are verified on
   real Linux systems. The [architecture](docs/architecture.md) and the
@@ -153,11 +157,11 @@ Linux Mint 22.2 and macOS ([tested environments](docs/installation.md#tested-env
 
 ## Roadmap
 
-VHS 0.1 covers on-demand downloads, the library, playback, local organization, file
-verification and backups. Planned next: more platforms besides YouTube, platform cookies,
-subscriptions to channels and playlists, Jellyfin integration, network storage (NFS, SMB,
-NAS) and more automation. Details and decisions are in §39 of
-[architecture.md](docs/architecture.md).
+VHS 0.2 covers on-demand downloads, the library, playback, local organization, file
+verification and backups, installed and updated from tested releases. Planned next: more
+platforms besides YouTube, platform cookies, subscriptions to channels and playlists,
+Jellyfin integration, network storage (NFS, SMB, NAS) and more automation. Details and
+decisions are in §39 of [architecture.md](docs/architecture.md).
 
 ## Documentation
 
