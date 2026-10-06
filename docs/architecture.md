@@ -1887,12 +1887,11 @@ Browser ── http://localhost:8081  (127.0.0.1 only, VHS_DEV_HTTP_PORT)
   database cannot be reached from outside.
 - **Overrides and the resulting configuration.** In an override, ports and volumes are
   added to those of the main file, while build, image and command replace them.
-  `docker-compose.dev.yml` therefore uses `ports: !override`, `volumes: !override` and
-  `build: !reset null` (for nginx, which must not build the SPA).
+  `docker-compose.dev.yml` therefore uses `ports: !override` and `volumes: !override`.
   `scripts/check-dev-config.sh` checks the **resulting** configuration (ports, build,
   images, mounts, commands, user, project) for both development and the installation.
-  Without `!override`, for example, Nginx would also publish port 8080 on all
-  interfaces.
+  Without `!override`, for example, Nginx would also publish the installation's port
+  (1976) on all interfaces.
 - **Protected media as in production:** Django checks the session and responds with
   `X-Accel-Redirect: /media-internal/<relative path>`; Nginx serves the file and
   handles HTTP Range Requests (`206`, `Content-Range`, `416`). Django does not implement

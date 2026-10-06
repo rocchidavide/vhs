@@ -108,7 +108,7 @@ for label, name in (("Installation (docker-compose.yml, .env.example)", "base"),
     expect("project", cfg["name"], "vhs")
     expect("services", sorted(s), ["backend", "db", "migrate", "nginx", "worker"])
     published = {n: ports(svc) for n, svc in s.items() if ports(svc)}
-    wanted = {"nginx": ["0.0.0.0:8080->80"]} if name == "base" else {"nginx": ["0.0.0.0:443->443", "0.0.0.0:80->80"]}
+    wanted = {"nginx": ["0.0.0.0:1976->80"]} if name == "base" else {"nginx": ["0.0.0.0:1976->80", "0.0.0.0:1977->443"]}
     expect("published ports", published, wanted)
     for n in ("migrate", "backend", "worker"):
         svc = s[n]

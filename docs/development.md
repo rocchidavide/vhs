@@ -235,9 +235,8 @@ folder** following [installation.md](installation.md), with its own
 `.env` and its own video folder, and remove it when you are done.
 
 If you try it on the same machine, give the test installation its own project
-name and port (`COMPOSE_PROJECT_NAME=vhs-test`,
-`VHS_HTTP_PORT=8090` and `COMPOSE_FILE=docker-compose.yml` in its `.env`),
-because `docker-compose.prod.yml` uses port 80. Clean up with
+name and ports (`COMPOSE_PROJECT_NAME=vhs-test`, `VHS_HTTP_PORT=8090` and
+`VHS_HTTPS_PORT=8453` in its `.env`). Clean up with
 `docker compose down -v` **from its folder**: there it acts only on
 that installation.
 
