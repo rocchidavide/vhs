@@ -24,3 +24,6 @@ restore-reports/
 .DS_Store
 .idea/
 .vscode/
+
+# TLS certificate and key of an installation (VHS_HTTPS)
+/certs/
