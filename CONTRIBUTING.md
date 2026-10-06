@@ -30,9 +30,10 @@ Python every day, with yt-dlp in a pull request of its own, the rest every week.
 
 - A **yt-dlp** update that fixes a platform change is released right away: merge the pull
   request once the CI is green, then release a patch version (0.1.x).
-- To release: update the version in `pyproject.toml` and in `frontend/package.json` (and
-  `package-lock.json`), merge to `main`, create an annotated tag (`git tag -a v0.1.2`) and a
-  GitHub release with the notes. Installations see the new version on their Home page.
+- To release: update the version in `pyproject.toml` (then run `uv lock`) and in
+  `frontend/package.json` (and `package-lock.json`), merge to `main`, create an annotated tag
+  (`git tag -a v0.1.2`) and a GitHub release with the notes, marked as the latest release:
+  installations read the latest release to announce the new version on their Home page.
 
 By contributing, you agree that your contribution is released under the project's
 [MIT License](LICENSE).

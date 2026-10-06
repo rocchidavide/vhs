@@ -683,6 +683,7 @@ speed
 eta
 error_message
 error_code
+ytdlp_version
 started_at
 completed_at
 last_heartbeat_at
@@ -1598,6 +1599,8 @@ DELETE /api/v1/collections/{id}
 POST   /api/v1/collections/{id}/videos
 DELETE /api/v1/collections/{id}/videos/{video_id}
 PUT    /api/v1/collections/{id}/videos/order
+
+GET    /api/v1/system/info               # versions and update check, signed-in users only
 
 ```
 

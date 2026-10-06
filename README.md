@@ -36,6 +36,8 @@ YouTube is the first supported platform; VHS is built to support more.
   own tags and playlists.
 - **Search and filter** by title, description, channel, tag or collection.
 - **Verify, back up and restore** the library and the database with one command each.
+- **Stays current:** the Home page announces new releases, and yt-dlp fixes for platform
+  changes arrive as tested VHS releases.
 - **Runs anywhere Docker does:** a Linux server, a NAS that runs Docker or a home
   computer, also over plain HTTP on a trusted local network.
 
@@ -146,7 +148,7 @@ Linux Mint 22.2 and macOS ([tested environments](docs/installation.md#tested-env
 
 ## Roadmap
 
-VHS 0.1.0 covers on-demand downloads, the library, playback, local organization, file
+VHS 0.1 covers on-demand downloads, the library, playback, local organization, file
 verification and backups. Planned next: more platforms besides YouTube, platform cookies,
 subscriptions to channels and playlists, Jellyfin integration, network storage (NFS, SMB,
 NAS) and more automation. Details and decisions are in §39 of
