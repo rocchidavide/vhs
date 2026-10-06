@@ -1,5 +1,9 @@
 # VHS installation: db, migrate, backend, worker, nginx (see docs/installation.md).
-# Development uses this same file plus the docker-compose.dev.yml override (docs/development.md).
+# The VHS images are the ones published for this release on GitHub's container registry: an
+# installation pulls them, it never builds them. Their version is changed only by a release
+# (CONTRIBUTING.md, "Releasing"). Development uses this same file plus the
+# docker-compose.dev.yml override, which builds its own images (docs/development.md);
+# docker-compose.build.yml builds the production images locally, to test them before a release.
 #
 # The video library is a folder of the host, set in .env with VHS_HOST_LIBRARY (see
 # docs/installation.md). It must exist before starting and be writable by uid 1000:
@@ -18,11 +22,7 @@ x-library: &library
     create_host_path: false
 
 x-backend: &backend
-  build:
-    context: .
-    dockerfile: docker/Dockerfile.backend
-    target: prod
-  image: vhs-backend
+  image: ghcr.io/rocchidavide/vhs-backend:0.1.1
   env_file:
     - path: .env
       required: false
@@ -89,10 +89,7 @@ services:
         condition: service_completed_successfully
 
   nginx:
-    build:
-      context: .
-      dockerfile: docker/Dockerfile.nginx
-    image: vhs-nginx
+    image: ghcr.io/rocchidavide/vhs-nginx:0.1.1
     ports:
       - "${VHS_HTTP_PORT:-8080}:80"
     volumes:

@@ -8,13 +8,15 @@
 # production. Services reach each other by name inside the Docker network.
 #
 # Ports and volumes of an override ADD to those of docker-compose.yml, build/image/command
-# replace them: "!override" and "!reset" below keep only what development needs. Check the
+# replace them: "!override" below keeps only what development needs. Check the
 # merged configuration with scripts/check-dev-config.sh.
 
 name: vhs-dev
 
 x-backend-dev: &backend-dev
   build:
+    context: .
+    dockerfile: docker/Dockerfile.backend
     target: dev
   image: vhs-backend-dev
   # On Linux, set VHS_UID/VHS_GID to your ids if they are not 1000, so that files created in
@@ -74,7 +76,6 @@ services:
       - node_modules:/app/frontend/node_modules
 
   nginx:
-    build: !reset null
     image: nginx:alpine
     ports: !override
       # Loopback only: the development environment is never exposed on the LAN.

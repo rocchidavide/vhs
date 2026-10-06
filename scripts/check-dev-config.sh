@@ -5,7 +5,9 @@
 # Usage: scripts/check-dev-config.sh
 #
 # Development: docker-compose.yml + docker-compose.dev.yml with .env.dev.example.
-# Installation: docker-compose.yml alone and with docker-compose.prod.yml, with .env.example.
+# Installation: docker-compose.yml alone and with docker-compose.prod.yml, with .env.example:
+# the published images, never a build. With docker-compose.build.yml: the same images built
+# locally, to test them before a release.
 # Overrides add ports and volumes to the main file, so a missing "!override" would silently
 # publish more than intended: this is what the script catches.
 
@@ -29,6 +31,7 @@ config() { # <env-file> <compose files...>
 config .env.dev.example docker-compose.yml docker-compose.dev.yml >"$TMP/dev.json"
 config .env.example docker-compose.yml >"$TMP/base.json"
 config .env.example docker-compose.yml docker-compose.prod.yml >"$TMP/prod.json"
+config .env.example docker-compose.yml docker-compose.prod.yml docker-compose.build.yml >"$TMP/build.json"
 
 docker run --rm -i -e REPO="$PWD" -v "$TMP:/check:ro" python:3.13-slim python - <<'PY'
 import json, os, sys
@@ -94,11 +97,14 @@ expect("nginx: image", s["nginx"].get("image"), "nginx:alpine")
 expect("nginx: mounts", [m[2:] for m in mounts(s["nginx"])], [("/etc/nginx/conf.d/default.conf", True), ("/srv/video-library", True)])
 expect("frontend: ports", ports(s["frontend"]), [])
 
+REGISTRY = "ghcr.io/rocchidavide/"
 for label, name in (("Installation (docker-compose.yml, .env.example)", "base"),
-                    ("Installation (docker-compose.yml + docker-compose.prod.yml, .env.example)", "prod")):
+                    ("Installation (docker-compose.yml + docker-compose.prod.yml, .env.example)", "prod"),
+                    ("Installation built locally (+ docker-compose.build.yml)", "build")):
     print(f"== {label}")
     cfg = load(name)
     s = cfg["services"]
+    built = name == "build"
     expect("project", cfg["name"], "vhs")
     expect("services", sorted(s), ["backend", "db", "migrate", "nginx", "worker"])
     published = {n: ports(svc) for n, svc in s.items() if ports(svc)}
@@ -106,10 +112,13 @@ for label, name in (("Installation (docker-compose.yml, .env.example)", "base"),
     expect("published ports", published, wanted)
     for n in ("migrate", "backend", "worker"):
         svc = s[n]
-        expect(f"{n}: build target", svc.get("build", {}).get("target"), "prod")
-        expect(f"{n}: image", svc.get("image"), "vhs-backend")
+        expect(f"{n}: build target", svc.get("build", {}).get("target"), "prod" if built else None)
+        image = svc.get("image", "")
+        expect(f"{n}: image", image if built else image.rsplit(":", 1)[0], "vhs-backend" if built else REGISTRY + "vhs-backend")
         expect(f"{n}: repository mounted", any(m[2] == "/app" for m in mounts(svc)), False)
-    expect("nginx: SPA build", "build" in s["nginx"], True)
+    expect("nginx: build", "build" in s["nginx"], built)
+    image = s["nginx"].get("image", "")
+    expect("nginx: image", image if built else image.rsplit(":", 1)[0], "vhs-nginx" if built else REGISTRY + "vhs-nginx")
     lib_mounts = {n: [m[3] for m in mounts(svc) if m[2] == "/srv/video-library"] for n, svc in s.items()}
     expect("library read-only per service", lib_mounts, {"backend": [False], "db": [], "migrate": [False], "nginx": [True], "worker": [False]})
 
