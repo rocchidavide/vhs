@@ -69,6 +69,10 @@ jobs:
     steps:
       - uses: actions/checkout@v7
 
+      # The image creation date: the commit's, instead of none (shown as 1970 by Docker).
+      - name: Date of the commit
+        run: echo "SOURCE_DATE_EPOCH=$(git log -1 --format=%ct)" >>"$GITHUB_ENV"
+
       - uses: docker/setup-buildx-action@v4
 
       - uses: docker/login-action@v4
