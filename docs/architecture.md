@@ -2745,6 +2745,26 @@ reproducible.
 
 ---
 
+## Decision: Installations follow releases
+
+An installation runs only what a release published: the VHS images on GitHub's container
+registry, built and tested by the release workflow for x86_64 and arm64, and `vhs.tar.gz`,
+the few files kept on the server (Compose files, `./vhs`, the backup scripts). The
+installation downloads the bundle from the latest release; `./vhs update` replaces its files
+and pulls the images. Two installations of the same version run the same files, and `main`
+can change without reaching anyone.
+
+Until VHS 0.1, installations were clones of `main` that built their images: they received
+whatever had been merged since the last release, and the same version number could mean
+different files. Following release tags with git, or a `stable` branch, were considered;
+both keep the build on the server, and the first makes updating more complex for users.
+
+The files of a release are never edited by the user (`./vhs update` replaces them): every
+setting is in `.env`. HTTPS too: `VHS_HTTPS=true` makes the Nginx image enable its HTTPS
+configuration at startup, with the certificate from the `certs` folder.
+
+---
+
 ## Decision: Abstract storage
 
 The domain does not know the concrete filesystem.
