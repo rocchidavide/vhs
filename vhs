@@ -24,6 +24,11 @@ manage() {
   run docker compose exec backend python manage.py "$@"
 }
 
+# The version of VHS in a docker-compose.yml: the tag of its published images.
+compose_version() {
+  sed -nE 's#^[[:space:]]*image: ghcr\.io/rocchidavide/vhs-backend:([^[:space:]]+).*#\1#p' "$1" | head -n 1
+}
+
 usage() {
   cat <<'EOF'
 Usage: ./vhs <command> [arguments]
@@ -38,7 +43,7 @@ Usage: ./vhs <command> [arguments]
   init-library          mark an existing VHS library folder (checks its videos first)
   backup <folder>       back up database and videos into <folder>
   restore <backup>      restore a backup into a new, never-started installation
-  update [--yes]        update VHS (git pull and rebuild); make a backup first
+  update [--yes]        update VHS to the latest release; make a backup first
   manage <command>      any Django command (manage.py)
   help                  this list
 
@@ -93,17 +98,44 @@ case "$command" in
     ;;
 
   update)
+    # The files of the latest release (scripts/make-bundle.sh); VHS_RELEASE_URL is for tests.
+    url=${VHS_RELEASE_URL:-https://github.com/rocchidavide/vhs/releases/latest/download/vhs.tar.gz}
+    command -v curl >/dev/null || die "curl is not installed."
+    work=$(mktemp -d)
+    trap 'rm -rf "$work"' EXIT
+    curl -fsSL "$url" -o "$work/vhs.tar.gz" || die "could not download $url"
+    mkdir "$work/release"
+    tar -xzf "$work/vhs.tar.gz" -C "$work/release" || die "$url is not a VHS release."
+    current=$(compose_version docker-compose.yml)
+    latest=$(compose_version "$work/release/docker-compose.yml")
+    [ -n "$latest" ] || die "$url is not a VHS release."
+    if [ "$latest" = "$current" ]; then
+      echo "VHS $current is the latest release: nothing to update."
+      exit 0
+    fi
+    # Forward only: the database migrations of a newer version cannot be undone.
+    if [ -n "$current" ] && [ "$(printf '%s\n' "$current" "$latest" | sort -V | tail -n 1)" != "$latest" ]; then
+      die "this installation (VHS $current) is newer than the latest release ($latest): nothing to update."
+    fi
+    echo "VHS ${current:-?} -> $latest. Release notes: https://github.com/rocchidavide/vhs/releases/tag/v$latest"
     if [ "${1:-}" != "--yes" ]; then
-      echo "Updating downloads the new version and rebuilds the images; the database is"
-      echo "migrated at startup. Make a backup first: ./vhs backup <folder>"
+      echo "Updating replaces the VHS files in this folder (never .env), downloads the new images"
+      echo "and restarts VHS; the database is migrated at startup. Make a backup first:"
+      echo "./vhs backup <folder>"
       read -r -p "Update now? [y/N] " answer || answer=""
       case "$answer" in
         y | Y | yes | YES) ;;
         *) die "update cancelled." ;;
       esac
     fi
-    run git pull --ff-only
-    run docker compose up -d --build
+    # Each file is replaced by a rename, this script included: the running copy is not changed.
+    (cd "$work/release" && find . -type f) | while read -r file; do
+      mkdir -p "$(dirname "$file")"
+      cp -p "$work/release/$file" "$file.new"
+      mv -f "$file.new" "$file"
+    done
+    run docker compose pull
+    run docker compose up -d
     ;;
 
   manage)
