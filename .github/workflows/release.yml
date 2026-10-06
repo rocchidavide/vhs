@@ -1,0 +1,201 @@
+# Publishes a release when its tag is pushed (CONTRIBUTING.md, "Releasing"):
+#   1. checks that the tag matches the version in the repository;
+#   2. builds the VHS images for x86_64 and arm64 and pushes them to ghcr.io;
+#   3. installs VHS from the release bundle on both architectures and checks that it answers;
+#   4. creates a DRAFT GitHub release with the bundle (vhs.tar.gz) attached.
+# The release becomes visible, and installations are told about it, only when it is published
+# by hand, with its notes: by then its images and bundle exist.
+#
+# Tags: vX.Y.Z for a release; vX.Y.Z-rc.N for a test pre-release, never announced to
+# installations (no "latest" image tag, marked as a pre-release on GitHub).
+
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: release-${{ github.ref }}
+
+env:
+  REGISTRY: ghcr.io/rocchidavide
+
+jobs:
+  check:
+    name: Tag and versions
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+      prerelease: ${{ steps.version.outputs.prerelease }}
+    steps:
+      - uses: actions/checkout@v7
+
+      - id: version
+        name: The tag matches the version in the repository
+        run: |
+          tag=$GITHUB_REF_NAME
+          [[ $tag =~ ^v([0-9]+\.[0-9]+\.[0-9]+)(-rc\.[0-9]+)?$ ]] \
+            || { echo "::error::$tag is not vX.Y.Z or vX.Y.Z-rc.N"; exit 1; }
+          release=${BASH_REMATCH[1]}
+          project=$(python3 -c 'import tomllib; print(tomllib.load(open("pyproject.toml", "rb"))["project"]["version"])')
+          [ "$project" = "$release" ] \
+            || { echo "::error::$tag, but pyproject.toml says $project"; exit 1; }
+          # The image versions in docker-compose.yml agree with pyproject.toml: see
+          # backend/tests/test_release_versions.py, run by the CI.
+          echo "version=${tag#v}" >>"$GITHUB_OUTPUT"
+          echo "prerelease=$([ -n "${BASH_REMATCH[2]}" ] && echo true || echo false)" >>"$GITHUB_OUTPUT"
+
+  images:
+    name: Image ${{ matrix.image }} (${{ matrix.arch }})
+    needs: check
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        image: [backend, nginx]
+        arch: [amd64, arm64]
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      # One tag per architecture; the "manifests" job joins them under the release tags.
+      - uses: docker/build-push-action@v7
+        with:
+          context: .
+          file: docker/Dockerfile.${{ matrix.image }}
+          target: ${{ matrix.image == 'backend' && 'prod' || '' }}
+          platforms: linux/${{ matrix.arch }}
+          push: true
+          tags: ${{ env.REGISTRY }}/vhs-${{ matrix.image }}:${{ needs.check.outputs.version }}-${{ matrix.arch }}
+          labels: |
+            org.opencontainers.image.source=https://github.com/${{ github.repository }}
+            org.opencontainers.image.version=${{ needs.check.outputs.version }}
+            org.opencontainers.image.licenses=MIT
+          cache-from: type=gha,scope=release-${{ matrix.image }}-${{ matrix.arch }}
+          cache-to: type=gha,scope=release-${{ matrix.image }}-${{ matrix.arch }},mode=max
+
+  manifests:
+    name: Release tags of ${{ matrix.image }}
+    needs: [check, images]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        image: [backend, nginx]
+    steps:
+      - uses: docker/setup-buildx-action@v4
+
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: One tag for both architectures
+        env:
+          IMAGE: ${{ env.REGISTRY }}/vhs-${{ matrix.image }}
+          VERSION: ${{ needs.check.outputs.version }}
+          PRERELEASE: ${{ needs.check.outputs.prerelease }}
+        run: |
+          tags=(-t "$IMAGE:$VERSION")
+          [ "$PRERELEASE" = true ] || tags+=(-t "$IMAGE:latest")
+          docker buildx imagetools create "${tags[@]}" "$IMAGE:$VERSION-amd64" "$IMAGE:$VERSION-arm64"
+          docker buildx imagetools inspect "$IMAGE:$VERSION"
+
+  smoke:
+    name: Install from the bundle (${{ matrix.arch }})
+    needs: [check, manifests]
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: read
+    strategy:
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    steps:
+      - uses: actions/checkout@v7
+
+      # Until the packages are made public (once, after the first release), pulling needs a login.
+      - uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Install as in docs/installation.md
+        env:
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          scripts/make-bundle.sh "$VERSION" "$RUNNER_TEMP/vhs.tar.gz"
+          mkdir "$RUNNER_TEMP/vhs" && cd "$RUNNER_TEMP/vhs"
+          tar -xzf "$RUNNER_TEMP/vhs.tar.gz"
+          sudo mkdir -p /srv/vhs/library && sudo chown 1000:1000 /srv/vhs/library
+          sed -e "s/^DJANGO_SECRET_KEY=.*/DJANGO_SECRET_KEY=$(openssl rand -hex 32)/" \
+              -e "s/^POSTGRES_PASSWORD=.*/POSTGRES_PASSWORD=$(openssl rand -hex 16)/" \
+              -e "s/^DJANGO_ALLOWED_HOSTS=.*/DJANGO_ALLOWED_HOSTS=localhost/" \
+              .env.example >.env
+          ./vhs start
+
+      - name: VHS answers, with the images of this version
+        working-directory: ${{ runner.temp }}/vhs
+        env:
+          VERSION: ${{ needs.check.outputs.version }}
+        run: |
+          for _ in $(seq 60); do
+            if curl -fsS http://localhost/api/v1/health; then
+              docker compose images
+              docker compose images --format json | grep -q "vhs-backend.*$VERSION"
+              exit 0
+            fi
+            sleep 5
+          done
+          docker compose ps
+          docker compose logs
+          exit 1
+
+  release:
+    name: Draft release
+    needs: [check, smoke]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Draft release with the bundle
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ needs.check.outputs.version }}
+          PRERELEASE: ${{ needs.check.outputs.prerelease }}
+        run: |
+          scripts/make-bundle.sh "$VERSION" vhs.tar.gz
+          flags=(--draft --verify-tag --title "VHS $VERSION")
+          [ "$PRERELEASE" = true ] && flags+=(--prerelease)
+          gh release create "$GITHUB_REF_NAME" vhs.tar.gz "${flags[@]}" \
+            --notes "Release notes to be written before publishing."
