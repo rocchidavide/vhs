@@ -140,6 +140,9 @@ STATIC_ROOT = env_path("DJANGO_STATIC_ROOT", PROJECT_DIR / "staticfiles")
 
 # Video library: a local folder, a Docker volume or a host folder (docs/storage-decisions.md).
 VHS_MEDIA_ROOT = env_path("VHS_MEDIA_ROOT", PROJECT_DIR / "video-library")
+# The same folder as seen on the server, with Docker (.env): shown in messages only, since the
+# containers see it as VHS_MEDIA_ROOT.
+VHS_HOST_LIBRARY = env("VHS_HOST_LIBRARY", "")
 VHS_NAMING_TEMPLATE = env("VHS_NAMING_TEMPLATE", "standard")
 # Ask GitHub, at most twice a day, whether a newer VHS release exists (shown on the Home
 # page to signed-in users). Turn it off to make no request at all.
