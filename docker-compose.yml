@@ -22,7 +22,7 @@ x-library: &library
     create_host_path: false
 
 x-backend: &backend
-  image: ghcr.io/rocchidavide/vhs-backend:0.2.0
+  image: ghcr.io/rocchidavide/vhs-backend:0.2.1
   env_file:
     - path: .env
       required: false
@@ -89,7 +89,7 @@ services:
         condition: service_completed_successfully
 
   nginx:
-    image: ghcr.io/rocchidavide/vhs-nginx:0.2.0
+    image: ghcr.io/rocchidavide/vhs-nginx:0.2.1
     ports:
       - "${VHS_HTTP_PORT:-1976}:80"
     volumes:
