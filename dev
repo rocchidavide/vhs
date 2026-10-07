@@ -39,6 +39,7 @@ Usage: ./dev <command> [arguments]
   after-debug         bring backend and worker back after debugging from PyCharm
   check-config        check the merged configuration of the Compose files
   check-symlinks      check that Nginx never serves a symlink from the library
+  sync                after a pull request is merged: update main, delete merged branches
   help                this list
 EOF
 }
@@ -113,6 +114,42 @@ case "$command" in
 
   check-config)
     run scripts/check-dev-config.sh
+    ;;
+
+  sync)
+    # After a pull request is merged on GitHub (docs/development.md): main up to date, the local
+    # branches deleted on GitHub removed, and what to rebuild.
+    [ -z "$(git status --porcelain --untracked-files=no)" ] \
+      || die "there are uncommitted changes: commit or stash them first."
+    before=$(git rev-parse main)
+    run git checkout -q main
+    run git fetch --prune
+    run git merge --ff-only origin/main
+    # "gone": the branch on GitHub was deleted, usually after its pull request was merged,
+    # but also when it was closed without merging: ask before deleting.
+    gone=$(git for-each-ref --format='%(refname:short) %(upstream:track)' refs/heads \
+      | awk '$2 == "[gone]" { print $1 }')
+    if [ -n "$gone" ]; then
+      echo "Deleted on GitHub (merged, or closed without merging): $(printf '%s\n' "$gone" | tr '\n' ' ')"
+      read -r -p "Delete these local branches? [y/N] " answer || answer=""
+      case "$answer" in
+        y | Y | yes | YES) for branch in $gone; do run git branch -D "$branch"; done ;;
+        *) echo "Local branches kept." ;;
+      esac
+    fi
+    changed=$(git diff --name-only "$before" HEAD)
+    todo=""
+    hint() {
+      if printf '%s\n' "$changed" | grep -Eq "$1"; then
+        echo "Changed: $2 -> run $3"
+        todo=yes
+      fi
+    }
+    hint '^(uv\.lock|pyproject\.toml|docker/Dockerfile\.(backend|frontend-dev))$' \
+      "Python dependencies or Dockerfiles" "./dev build"
+    hint '^frontend/package-lock\.json$' "frontend dependencies" "./dev restart frontend"
+    hint '/migrations/' "database migrations" "./dev migrate"
+    [ -n "$todo" ] || echo "Nothing to rebuild."
     ;;
 
   help | -h | --help)

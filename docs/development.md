@@ -97,6 +97,7 @@ which in turn refuses to start with the development `.env`.
 | After a PyCharm debug session | `./dev after-debug` | `docker compose up -d --no-deps backend worker` |
 | Check the Compose files | `./dev check-config` | `scripts/check-dev-config.sh` |
 | Check that Nginx serves no symlink | `./dev check-symlinks` | `scripts/check-nginx-symlinks.sh` |
+| After a pull request is merged | `./dev sync` | `git checkout main`, `git fetch --prune`, `git merge --ff-only origin/main`, `git branch -D <merged branch>` |
 
 Migrations are also applied on every `./dev start`, by the
 `migrate` service, which uses the same mounted code as `backend` and `worker`.
