@@ -99,7 +99,8 @@ documented, and most are enforced by tests.
 - **Your files come first.** Downloads are written to a work area and promoted with an
   atomic hard link that never overwrites anything; each file is checksummed. VHS writes
   only into a library folder marked as its own, never deletes your files automatically,
-  and its verification is read-only.
+  and its verification is read-only. [Data safety](docs/data-safety.md) lists every
+  guarantee, the tests behind it and its limits.
 - **Recovers by itself.** Every task can be run again safely; heartbeats and a
   reconciliation every 5 minutes resume interrupted work and clean up after a crash.
 - **Protected media.** Django checks who may watch; Nginx streams the file with
@@ -169,6 +170,8 @@ decisions are in §39 of [architecture.md](docs/architecture.md).
   configuration, HTTPS, library verification, backup and restore, updates.
 - **[Developing VHS](docs/development.md)**: the development environment (everything runs
   in containers, through `./dev`), tests, debugging, translations.
+- **[Data safety](docs/data-safety.md)**: what VHS guarantees about your videos and data,
+  how it is tested, and what it cannot protect you from.
 - [Architecture](docs/architecture.md), [conventions](docs/conventions.md) and
   [storage and backup decisions](docs/storage-decisions.md).
 
