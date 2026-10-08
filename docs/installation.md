@@ -155,7 +155,7 @@ commands that delete data, and it refuses to start with the development `.env`.
 
 | What | `./vhs` | Equivalent command |
 |---|---|---|
-| Start VHS | `./vhs start` | `docker compose up -d` |
+| Start VHS | `./vhs start` | `docker compose up -d`, after checking that the database is this installation's ([Troubleshooting](#troubleshooting)) |
 | Stop it | `./vhs stop` | `docker compose stop` |
 | See the services | `./vhs status` | `docker compose ps` |
 | Follow the logs | `./vhs logs [service]` | `docker compose logs -f [service]` |
@@ -448,6 +448,34 @@ until it is back.
 **A download fails with "Storage error" and "Not enough space".** The library disk does not
 have room for the video plus the reserve set by `VHS_MIN_FREE_BYTES`: free some space or
 lower the reserve ([Settings](#settings)).
+
+**`./vhs start` asks about the database before starting.** VHS keeps its database in a Docker
+volume, which stays on the machine when the VHS folder is deleted, and every installation on
+the machine uses the same one. `./vhs` records which database the installation uses in
+`.vhs-database`, in the VHS folder, and asks before starting with a different one. Answering
+`N`, or nothing, changes nothing.
+
+- **"A VHS database already exists on this machine"**: the folder is new, for example after
+  reinstalling VHS, and found the database of a previous installation.
+  - To keep it, with its users, videos, tags and collections, answer `y` and set
+    `VHS_HOST_LIBRARY` in `.env` to the library of that installation: its videos are there.
+  - To start from an empty database instead, delete the old one with
+    `docker compose down -v`, then run `./vhs start` again. **This deletes that database for
+    good**: if it may still matter, first answer `y` and make a backup
+    ([Backup](#backup)).
+- **"The database is not the one this installation used"**: the database was deleted and
+  created again, for example by `docker compose down -v` in another VHS folder on this
+  machine. Answer `y` to use it as it is.
+- **"The database of this installation … no longer exists"**: it was deleted (by
+  `docker compose down -v`, or by resetting or reinstalling Docker), or `COMPOSE_PROJECT_NAME`
+  in `.env` changed. If you changed `COMPOSE_PROJECT_NAME`, set it back. Otherwise answer `y`
+  to start with an empty database, or restore a backup into a new installation
+  ([Restore](#restore)).
+
+`./vhs start --yes` and `./vhs update --yes` answer `y` without asking; `docker compose up -d`
+does not check. To run a second installation on the same machine, for example to try
+something, give it its own database with `COMPOSE_PROJECT_NAME=vhs-test` in its `.env`, and its
+own ports (`VHS_HTTP_PORT`, `VHS_HTTPS_PORT`).
 
 **A video does not play.** Open its page: if the browser copy is not ready, press
 **"Prepare for playback"** to convert it (the original file is not changed).
