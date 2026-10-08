@@ -19,6 +19,7 @@ frontend/dist/
 video-library/
 staticfiles/
 restore-reports/
+.vhs-database
 
 # OS / editor
 .DS_Store

@@ -183,6 +183,20 @@ jobs:
           docker compose logs
           exit 1
 
+      - name: A second installation folder asks before using the same database
+        run: |
+          grep -qx 'volume=vhs_pgdata' "$RUNNER_TEMP/vhs/.vhs-database"
+          mkdir "$RUNNER_TEMP/vhs2" && cd "$RUNNER_TEMP/vhs2"
+          tar -xzf "$RUNNER_TEMP/vhs.tar.gz"
+          cp "$RUNNER_TEMP/vhs/.env" .env
+          if ./vhs start </dev/null; then
+            echo "./vhs start used the database of the first installation without asking" >&2
+            exit 1
+          fi
+          [ ! -e .vhs-database ]
+          ./vhs start --yes
+          diff "$RUNNER_TEMP/vhs/.vhs-database" .vhs-database
+
   release:
     name: Draft release
     needs: [check, smoke]
