@@ -2,7 +2,7 @@
 
 ## 1. Context
 
-VHS is an open source project to download, archive, organize and play back videos from YouTube and, in the future, from other platforms.
+VHS is an open source project to download, archive, organize and play back videos from YouTube, RaiPlay and, in the future, other platforms.
 
 The primary goal is to build a **personal video library**. The project is not meant to redistribute the archived content.
 
@@ -1277,6 +1277,25 @@ ffprobe on the archived file
 - Videos archived before analysis existed are analyzed by the periodic reconciliation or
   with `manage.py analyze_media`.
 
+### Audio track
+
+Some videos have several audio tracks: YouTube's original language and its dubs, RaiPlay's
+Italian track, original version and audio description. VHS downloads **one** track: the
+one the platform plays by default, never an audio description
+(`format_selector()` in `engine/downloader/ytdlp.py`).
+
+- On YouTube yt-dlp marks the original track and sorts it first.
+- A platform that marks no track declares the language of its default one
+  (`Platform.default_audio_language`; RaiPlay: Italian), and VHS asks for it first.
+- The archived track is recorded on the video: `audio_language` (BCP 47) and `audio_kind`
+  (`original`, `default`, `dubbed`, `description`, or empty when unknown), from the format
+  yt-dlp downloaded (`Platform.audio_track()`). Videos archived earlier have them empty;
+  their `.info.json` holds what is needed to fill them.
+
+Planned: choosing the language per video (and per channel with subscriptions), adding
+other languages as audio-only files next to the video, and switching track during
+playback. Recording the track now means none of this will need a new download.
+
 ---
 
 # 19. Metadata extraction
@@ -1284,16 +1303,24 @@ ffprobe on the archived file
 Metadata mapping is kept separate from the downloader.
 
 ```text
-MetadataExtractor
+Platform (engine/platforms/base.py)
     │
-    ├── YouTubeMetadataExtractor
-    └── GenericMetadataExtractor
+    ├── YouTube
+    └── RaiPlay
 
 ```
 
-The downloader produces raw data.
+The downloader produces raw data; the platform decides how to map it. `Platform.map()`
+reads yt-dlp's common fields, the same for every extractor; a platform overrides only
+what differs: the channel, short videos, platform metadata, its audio tracks and its own
+errors.
 
-The extractor decides how to map it.
+- **YouTube:** the channel is the uploader's channel; Shorts are recognized.
+- **RaiPlay:** the channel is the **series** ("Report", "Blanca"), falling back to the
+  network when there is none. The **network** ("Rai 3") is kept in `platform_metadata`
+  and shown on the video page: RaiPlay lists episodes of the same series under different
+  networks (reruns, extras), so it would split a series. A 404 on the video's description
+  means an expired video, not a network error.
 
 This makes it possible to add platforms without changing the downloader core.
 
@@ -2265,7 +2292,7 @@ shares the library.
 
 ## Other platforms (post-MVP)
 
-VHS is meant to archive videos from several platforms; YouTube is the first one. The
+VHS is meant to archive videos from several platforms; YouTube and RaiPlay are supported. The
 structure is already there: yt-dlp supports many sites, identity is `(platform,
 platform_id)` and the library has one folder per platform. Each new platform is enabled
 explicitly, never by accepting any URL yt-dlp understands. Everything VHS knows about a

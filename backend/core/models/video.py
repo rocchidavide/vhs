@@ -54,6 +54,10 @@ class Video(models.Model):
     video_codec = models.CharField(max_length=64, blank=True)
     audio_codec = models.CharField(max_length=64, blank=True)
     resolution = models.CharField(max_length=32, blank=True)
+    # The audio track of the archived copy (engine.audio): BCP 47 language and AudioKind, ""
+    # when unknown (videos archived before VHS recorded them).
+    audio_language = models.CharField(max_length=35, blank=True)
+    audio_kind = models.CharField(max_length=16, blank=True)
     downloaded_at = models.DateTimeField(null=True, blank=True)
     acquired_at = models.DateTimeField(null=True, blank=True)
     source_metadata_snapshot = models.JSONField(default=dict, blank=True)

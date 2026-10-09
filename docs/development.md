@@ -166,8 +166,8 @@ PyCharm must see the dependencies. Run `npm install` once in
 
 ## How a download works
 
-1. `POST /api/v1/downloads/` normalizes the URL (only YouTube hosts are accepted
-   today), extracts the metadata and deduplicates the video on
+1. `POST /api/v1/downloads/` normalizes the URL (only the hosts of the platforms in
+   `engine/platforms/` are accepted), extracts the metadata and deduplicates the video on
    `(platform, platform_id)`. There is at most one active download per video.
 2. The django-q2 worker downloads into `.incomplete/<id>/` inside the library, on the
    same filesystem.

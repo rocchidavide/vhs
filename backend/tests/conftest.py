@@ -62,6 +62,10 @@ def youtube_info(video_id: str = "jNQXAC9IVRw", **overrides) -> dict:
     return info | overrides
 
 
+def raiplay_info(**overrides) -> dict:
+    return json.loads((FIXTURES / "raiplay_video.json").read_text()) | overrides
+
+
 class FakeDownloader(BaseDownloader):
     """Deterministic downloader: writes small files into the work dir."""
 
@@ -71,6 +75,8 @@ class FakeDownloader(BaseDownloader):
         self.extract_error: EngineError | None = None
         self.download_error: Exception | None = None
         self.content = b"fake-video-content"
+        # The info of a URL, for extract_info and download (a YouTube video by default).
+        self.info_for = lambda url: youtube_info(url.rsplit("v=", 1)[-1])
         # Hook for tests to inspect state right after the early thumbnail callback.
         self.on_thumbnail_probe = lambda: None
         self.thumbnail_seen_during_download = None
@@ -83,13 +89,14 @@ class FakeDownloader(BaseDownloader):
         self.extract_calls.append(url)
         if self.extract_error:
             raise self.extract_error
-        return youtube_info(url.rsplit("v=", 1)[-1])
+        return self.info_for(url)
 
     def download(
         self, url, work_dir, on_progress, on_activity, on_thumbnail=None, on_processing=None
     ) -> DownloadResult:
         self.download_calls.append(url)
-        video_id = url.rsplit("v=", 1)[-1]
+        info = self.info_for(url)
+        video_id = info["id"]
         thumbnail = work_dir / f"{video_id}.webp"
         thumbnail.write_bytes(b"thumbnail")
         if on_thumbnail:
@@ -102,7 +109,6 @@ class FakeDownloader(BaseDownloader):
         media = work_dir / f"{video_id}.mp4"
         media.write_bytes(self.content)
         info_json = work_dir / f"{video_id}.info.json"
-        info = youtube_info(video_id)
         info_json.write_text(json.dumps(info))
         on_progress(Progress(downloaded_bytes=len(self.content), total_bytes=len(self.content)))
         on_activity()

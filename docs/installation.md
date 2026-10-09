@@ -190,9 +190,16 @@ commands that delete data, and it refuses to start with the development `.env`.
 
 ## Using VHS
 
-- **Downloading:** on the **Downloads** page, paste the URL of a YouTube video. VHS
-  downloads it in the background together with its thumbnail and metadata. A failed
-  download can be retried from the same page.
+- **Downloading:** on the **Downloads** page, paste the URL of a YouTube or RaiPlay video.
+  VHS downloads it in the background together with its thumbnail and metadata. A failed
+  download can be retried from the same page. For videos with several audio tracks, VHS
+  downloads the one the platform plays by default (on YouTube the original language, on
+  RaiPlay the Italian track), never an audio description; the video's page says which one.
+- **RaiPlay:** paste the page of a single video (`raiplay.it/video/…`), not of a programme
+  or a live channel. RaiPlay is available only from Italy, its videos often expire, and
+  titles protected by DRM cannot be downloaded. In the library a RaiPlay video's channel
+  is its series (for example "Report"); its network ("Rai 3") is shown on the video's
+  page.
 - **Library:** search and filter the videos, also by source channel.
 - **Playback:** the video's page plays it and resumes where you left off. Videos in
   formats the browser cannot play directly are adapted: a container change happens
@@ -421,6 +428,17 @@ again once a VHS release with the fix is out.
 "pull" with "denied", "not found" or a network error). Check that the server reaches
 `ghcr.io` and that `docker-compose.yml` names a released version. The images are published
 for x86_64 (amd64) and arm64 servers; other architectures are not supported.
+
+**A download fails with "Not available in your country".** The platform limits the video
+to some countries: RaiPlay, for example, only to Italy. The server running VHS must reach
+the platform from one of those countries.
+
+**A download fails with "Protected by DRM: VHS cannot download it".** The platform
+encrypts the video. VHS does not try to get around it, and no setting changes this.
+
+**A RaiPlay download fails with "Video not available on the platform".** RaiPlay keeps
+many videos only for a while: when its rights expire, the page stays reachable for some
+time but the video is gone.
 
 **Every download fails with "Network error".** The server cannot reach the platform: check
 its internet connection and DNS. A VPN or firewall on the server, or on the computer that

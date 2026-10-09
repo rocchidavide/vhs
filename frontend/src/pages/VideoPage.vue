@@ -12,6 +12,7 @@ import {
   type TagRef,
 } from '@/api/organization'
 import {
+  audioTrackLabel,
   playbackLabel,
   playbackMessage,
   preparationLabel,
@@ -38,6 +39,9 @@ const player = ref<HTMLVideoElement | null>(null)
 
 const videoId = computed(() => Number(route.params.id))
 const playback = computed(() => video.value?.playback ?? null)
+const audioTrack = computed(() =>
+  video.value ? audioTrackLabel(video.value.audio_language, video.value.audio_kind) : null,
+)
 const ready = computed(() => playback.value?.status === 'ready')
 // The stored reason is a diagnostic: shown for analyses without codes (older ones, possibly
 // in another language) and for a failed analysis, where it carries the error.
@@ -254,6 +258,7 @@ onBeforeUnmount(() => {
     <h1>{{ video.title }}</h1>
     <p class="meta">
       {{ video.channel_name ?? t('common.unknownChannel') }} ·
+      <template v-if="video.network">{{ video.network }} · </template>
       {{ video.upload_date ?? t('common.unknownDate') }} · {{ formatDuration(video.duration) }}
     </p>
     <p class="meta playback-line">
@@ -266,6 +271,7 @@ onBeforeUnmount(() => {
       {{ video.audio_codec || '—' }} · {{ video.resolution || '—' }} ·
       {{ formatBytes(video.file_size) }}
     </p>
+    <p v-if="audioTrack" class="meta">{{ t('video.audio', { track: audioTrack }) }}</p>
 
     <section class="organize" aria-labelledby="personal-tags">
       <h2 id="personal-tags">{{ t('video.personalTags') }}</h2>

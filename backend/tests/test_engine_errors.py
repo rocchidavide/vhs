@@ -2,6 +2,7 @@ import pytest
 
 from engine.downloader.ytdlp import classify_error
 from engine.errors import ErrorCode, sanitize_message
+from engine.platforms import get_platform
 
 
 @pytest.mark.parametrize(
@@ -16,10 +17,30 @@ from engine.errors import ErrorCode, sanitize_message
         ("ERROR: Postprocessing: ffmpeg exited with code 1", ErrorCode.PROCESSING),
         ("ERROR: [Errno 28] No space left on device", ErrorCode.STORAGE),
         ("something odd", ErrorCode.UNKNOWN),
+        ("ERROR: [RaiPlay] abc: This video is DRM protected", ErrorCode.DRM),
+        (
+            "ERROR: [RaiPlay] abc: This video is not available from your location due to geo "
+            "restriction",
+            ErrorCode.GEO_RESTRICTED,
+        ),
+        (
+            "ERROR: [youtube] abc: The uploader has not made this video available in your country",
+            ErrorCode.GEO_RESTRICTED,
+        ),
     ],
 )
 def test_classify_error(message, code):
     assert classify_error(message) == code
+
+
+EXPIRED = "ERROR: [RaiPlay] abc: Unable to download JSON metadata: HTTP Error 404: Not Found"
+
+
+def test_a_platform_classifies_its_own_errors():
+    # On RaiPlay a 404 means an expired or removed video; elsewhere it stays a network error.
+    assert classify_error(EXPIRED, platform=get_platform("raiplay")) == ErrorCode.SOURCE_UNAVAILABLE
+    assert classify_error(EXPIRED, platform=get_platform("youtube")) == ErrorCode.NETWORK
+    assert classify_error(EXPIRED) == ErrorCode.NETWORK
 
 
 def test_sanitize_removes_query_strings_and_secrets():

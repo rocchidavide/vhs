@@ -1,0 +1,106 @@
+{
+  "id": "b1255a4a-8e72-4a2f-b9f3-fc1308e00736",
+  "title": "Blanca - S1E1 - Senza occhi",
+  "description": "Il commissariato genovese di San Teodoro viene messo sottosopra dall'arrivo di Blanca, una giovane donna non vedente che può finalmente realizzare il sogno coltivato fin da bambina: diventare una cons",
+  "duration": 6493,
+  "upload_date": "20211119",
+  "timestamp": 1637318940,
+  "thumbnail": "https://www.raiplay.it/dl/img/2021/11/19/1637315431431_blanca_1.jpg",
+  "uploader": "Rai Premium",
+  "series": "Blanca",
+  "season": "Season 1",
+  "season_number": 1,
+  "episode": "Senza occhi",
+  "episode_number": 1,
+  "webpage_url": "https://www.raiplay.it/video/2021/11/Blanca-S1E1-Senza-occhi-b1255a4a-8e72-4a2f-b9f3-fc1308e00736.html",
+  "extractor": "RaiPlay",
+  "extractor_key": "RaiPlay",
+  "format_id": "hls-Italiano-3+hls-aac-Italiano",
+  "language": "ita",
+  "formats": [
+    {
+      "format_id": "hls-aac-Audiodescrizione",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "vcodec": "none",
+      "acodec": "mp4a",
+      "language": "des"
+    },
+    {
+      "format_id": "hls-aac-VO",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "vcodec": "none",
+      "acodec": "mp4a",
+      "language": "vor"
+    },
+    {
+      "format_id": "hls-aac-Italiano",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "vcodec": "none",
+      "acodec": "mp4a",
+      "language": "ita"
+    },
+    {
+      "format_id": "hls-Italiano-0",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "vcodec": "avc1",
+      "acodec": "none",
+      "width": 1024,
+      "height": 576,
+      "tbr": 1758.0
+    },
+    {
+      "format_id": "hls-Italiano-1",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "vcodec": "avc1",
+      "acodec": "none",
+      "width": 1280,
+      "height": 720,
+      "tbr": 2344.0
+    },
+    {
+      "format_id": "hls-Italiano-2",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "vcodec": "avc1",
+      "acodec": "none",
+      "width": 1440,
+      "height": 810,
+      "tbr": 3516.0
+    },
+    {
+      "format_id": "hls-Italiano-3",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "vcodec": "avc1",
+      "acodec": "none",
+      "width": 1920,
+      "height": 1080,
+      "tbr": 5210.0
+    }
+  ],
+  "requested_formats": [
+    {
+      "format_id": "hls-Italiano-3",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "vcodec": "avc1",
+      "acodec": "none",
+      "width": 1920,
+      "height": 1080,
+      "tbr": 5210.0
+    },
+    {
+      "format_id": "hls-aac-Italiano",
+      "ext": "mp4",
+      "protocol": "m3u8_native",
+      "vcodec": "none",
+      "acodec": "mp4a",
+      "language": "ita"
+    }
+  ]
+}

@@ -66,7 +66,7 @@
   "downloads": {
     "title": "Downloads",
     "urlLabel": "Video URL",
-    "urlPlaceholder": "Paste the URL of a YouTube video",
+    "urlPlaceholder": "Paste the URL of a YouTube or RaiPlay video",
     "submit": "Download",
     "checking": "Checking…",
     "added": "Download added to the queue.",
@@ -97,6 +97,8 @@
     "error": {
       "authentication": "The platform requires signing in",
       "source_unavailable": "Video not available on the platform",
+      "geo_restricted": "Not available in your country",
+      "drm": "Protected by DRM: VHS cannot download it",
       "network": "Network error",
       "storage": "Storage error",
       "processing": "Processing error",
@@ -179,7 +181,14 @@
     "collections": "Collections",
     "notInCollection": "The video is not in any collection.",
     "sourceTags": "Source tags",
-    "sourceTagsHint": "Platform metadata, read-only in VHS."
+    "sourceTagsHint": "Platform metadata, read-only in VHS.",
+    "audio": "Audio: {track}",
+    "audioKind": {
+      "original": "original",
+      "default": "main track",
+      "dubbed": "dubbed",
+      "description": "audio description"
+    }
   },
   "tags": {
     "title": "Personal tags",

@@ -5,7 +5,8 @@ import shutil
 from pathlib import Path
 
 import yt_dlp
-from yt_dlp.utils import DownloadError, ExtractorError, PostProcessingError
+from yt_dlp.postprocessor import FFmpegThumbnailsConvertorPP
+from yt_dlp.utils import DownloadError, ExtractorError, PostProcessingError, replace_extension
 from yt_dlp.version import __version__ as YTDLP_VERSION
 
 from engine.downloader.base import (
@@ -18,17 +19,69 @@ from engine.downloader.base import (
     ThumbnailCallback,
 )
 from engine.errors import EngineError, ErrorCode
-from engine.platforms import ytdlp_extractors
+from engine.platforms import Platform, platform_for_url, ytdlp_extractors
 
 logger = logging.getLogger("vhs.engine.ytdlp")
 
+# Never an audio description: YouTube marks it "<language>-desc", RaiPlay "des".
+_NO_AUDIO_DESCRIPTION = "[language!*=?desc][language!=?des]"
+
 # Provisional v1 policy: prefer H.264/AAC in MP4 for HTML5 playback, fall back to the best.
 DEFAULT_FORMAT = (
-    "bv*[vcodec^=avc1][ext=mp4]+ba[acodec^=mp4a][ext=m4a]/b[vcodec^=avc1][ext=mp4]/bv*+ba/b"
+    f"bv*[vcodec^=avc1][ext=mp4]+ba[acodec^=mp4a][ext=m4a]{_NO_AUDIO_DESCRIPTION}"
+    f"/b[vcodec^=avc1][ext=mp4]/bv*+ba{_NO_AUDIO_DESCRIPTION}/b"
 )
+
+
+def format_selector(audio_language: str | None = None) -> str:
+    """DEFAULT_FORMAT, asking first for the audio track in a language (§18, audio track).
+
+    Without a language, yt-dlp's own order decides: on YouTube it puts the original track
+    first. A platform that marks no track (RaiPlay) gives the language of its default one.
+    """
+    if not audio_language:
+        return DEFAULT_FORMAT
+    audio = f"[language^={audio_language}]{_NO_AUDIO_DESCRIPTION}"
+    return f"bv*[vcodec^=avc1][ext=mp4]+ba[acodec^=mp4a]{audio}/bv*+ba{audio}/{DEFAULT_FORMAT}"
+
 
 THUMBNAIL_POSTPROCESSOR = "ThumbnailsConvertor"
 
+
+class _ThumbnailToWebp(FFmpegThumbnailsConvertorPP):
+    """yt-dlp's thumbnail conversion to WebP, which never fails a download.
+
+    ffmpeg reads the image as it is, not as its extension says: RaiPlay serves JPEG images
+    named .png, which yt-dlp's own conversion refuses. If the conversion still fails, the
+    video is downloaded without a thumbnail.
+    """
+
+    @classmethod
+    def pp_key(cls):
+        return THUMBNAIL_POSTPROCESSOR
+
+    def convert_thumbnail(self, thumbnail_filename, target_ext):
+        converted = replace_extension(thumbnail_filename, target_ext)
+        try:
+            self.real_run_ffmpeg(
+                [(thumbnail_filename, [])], [(converted, self._options(target_ext))]
+            )
+        except PostProcessingError:
+            # No half-written image left behind to be taken for the thumbnail.
+            Path(converted).unlink(missing_ok=True)
+            raise
+        return converted
+
+    def run(self, info):
+        try:
+            return super().run(info)
+        except PostProcessingError as exc:
+            logger.warning("video %s: no thumbnail (%s)", info.get("id"), exc)
+            return [], info
+
+
+_DRM_MARKERS = ("drm protected",)
+_GEO_MARKERS = ("geo restriction", "geo-restrict", "in your country", "from your location")
 _AUTH_MARKERS = ("sign in", "confirm your age", "login required", "members-only", "cookies")
 _UNAVAILABLE_MARKERS = (
     "private video",
@@ -71,10 +124,20 @@ def available_js_runtimes() -> dict:
     return {name: {} for name in ("deno", "node") if shutil.which(name)}
 
 
-def classify_error(message: str, *, postprocessing: bool = False) -> ErrorCode:
+def classify_error(
+    message: str, *, postprocessing: bool = False, platform: Platform | None = None
+) -> ErrorCode:
     text = message.lower()
-    if postprocessing or "ffmpeg" in text or "postprocessing" in text:
+    if postprocessing or any(
+        marker in text for marker in ("ffmpeg", "postprocessing", "preprocessing")
+    ):
         return ErrorCode.PROCESSING
+    if any(marker in text for marker in _DRM_MARKERS):
+        return ErrorCode.DRM
+    if any(marker in text for marker in _GEO_MARKERS):
+        return ErrorCode.GEO_RESTRICTED
+    if platform and (code := platform.classify_error(message)):
+        return code
     if any(marker in text for marker in _AUTH_MARKERS):
         return ErrorCode.AUTHENTICATION
     if any(marker in text for marker in _UNAVAILABLE_MARKERS):
@@ -121,7 +184,8 @@ class StreamProgress:
 
 
 class YTDLPDownloader(BaseDownloader):
-    def __init__(self, format_selector: str = DEFAULT_FORMAT, extra_options: dict | None = None):
+    def __init__(self, format_selector: str | None = None, extra_options: dict | None = None):
+        # None: the format of each URL's platform (format_selector()).
         self.format_selector = format_selector
         self.extra_options = extra_options or {}
 
@@ -130,7 +194,8 @@ class YTDLPDownloader(BaseDownloader):
         # The version actually imported: the emergency update may override the image's one.
         return YTDLP_VERSION
 
-    def _options(self, **overrides) -> dict:
+    def _options(self, url: str, **overrides) -> dict:
+        platform = platform_for_url(url)
         options = {
             "logger": _YtdlpLogger(),
             "quiet": True,
@@ -141,7 +206,8 @@ class YTDLPDownloader(BaseDownloader):
             "socket_timeout": 30,
             "retries": 3,
             "fragment_retries": 3,
-            "format": self.format_selector,
+            "format": self.format_selector
+            or format_selector(platform.default_audio_language if platform else None),
             "js_runtimes": available_js_runtimes(),
         }
         options.update(self.extra_options)
@@ -150,10 +216,11 @@ class YTDLPDownloader(BaseDownloader):
 
     def extract_info(self, url: str) -> dict:
         try:
-            with yt_dlp.YoutubeDL(self._options()) as ydl:
+            with yt_dlp.YoutubeDL(self._options(url)) as ydl:
                 info = ydl.sanitize_info(ydl.extract_info(url, download=False))
         except (DownloadError, ExtractorError) as exc:
-            raise EngineError(classify_error(str(exc)), str(exc)) from exc
+            code = classify_error(str(exc), platform=platform_for_url(url))
+            raise EngineError(code, str(exc)) from exc
         if info.get("_type") in {"playlist", "multi_video"}:
             raise EngineError(ErrorCode.PLAYLIST, "The URL points to a playlist, not a video.")
         return info
@@ -208,25 +275,25 @@ class YTDLPDownloader(BaseDownloader):
                     on_thumbnail(thumbnail)
 
         options = self._options(
+            url,
             paths={"home": str(work_dir), "temp": str(work_dir)},
             outtmpl={"default": "%(id)s.%(ext)s"},
             overwrites=False,
             writeinfojson=True,
             writethumbnail=True,
             merge_output_format="mp4/mkv",
-            postprocessors=[
-                {"key": "FFmpegThumbnailsConvertor", "format": "webp", "when": "before_dl"}
-            ],
             progress_hooks=[progress_hook],
             postprocessor_hooks=[postprocessor_hook],
         )
         try:
             with yt_dlp.YoutubeDL(options) as ydl:
+                ydl.add_post_processor(_ThumbnailToWebp(ydl, format="webp"), when="before_dl")
                 info = ydl.sanitize_info(ydl.extract_info(url, download=True))
         except PostProcessingError as exc:
             raise EngineError(ErrorCode.PROCESSING, str(exc)) from exc
         except (DownloadError, ExtractorError) as exc:
-            raise EngineError(classify_error(str(exc)), str(exc)) from exc
+            code = classify_error(str(exc), platform=platform_for_url(url))
+            raise EngineError(code, str(exc)) from exc
         except OSError as exc:
             raise EngineError(ErrorCode.STORAGE, str(exc)) from exc
 

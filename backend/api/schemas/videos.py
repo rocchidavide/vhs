@@ -49,6 +49,7 @@ class VideoOut(Schema):
     platform_id: str
     source_url: str
     channel_name: str | None = Field(None, alias="channel.name")
+    network: str | None = None
     duration: int | None
     upload_date: date | None
     local_status: str
@@ -58,6 +59,8 @@ class VideoOut(Schema):
     video_codec: str
     audio_codec: str
     resolution: str
+    audio_language: str
+    audio_kind: str
     file_size: int | None
     playback: PlaybackOut
     tags: list[TagRef]
@@ -75,6 +78,12 @@ class VideoOut(Schema):
     @staticmethod
     def resolve_collections(obj) -> list:
         return sorted(obj.collections.all(), key=lambda collection: collection.name.lower())
+
+    @staticmethod
+    def resolve_network(obj) -> str | None:
+        # The broadcaster, for platforms whose channel is a series (RaiPlay).
+        network = (obj.platform_metadata or {}).get("network")
+        return str(network) if network else None
 
     @staticmethod
     def resolve_source_tags(obj) -> list[str]:
