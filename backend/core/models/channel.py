@@ -1,7 +1,5 @@
 from django.db import models
 
-from core.models.platform import Platform
-
 
 class Channel(models.Model):
     """The source channel of archived videos: metadata and a library filter.
@@ -10,7 +8,9 @@ class Channel(models.Model):
     """
 
     name = models.CharField(max_length=255)
-    platform = models.CharField(max_length=32, choices=Platform.choices)
+    # A key of engine.platforms, checked by the services: no choices, so that a new platform
+    # needs no migration.
+    platform = models.CharField(max_length=32)
     platform_id = models.CharField(max_length=128)
     url = models.URLField(max_length=2048, blank=True)
     created_at = models.DateTimeField(auto_now_add=True)

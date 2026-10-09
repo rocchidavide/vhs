@@ -2,7 +2,6 @@ from django.db import models
 from django.utils.translation import gettext_lazy as _
 
 from core.models.channel import Channel
-from core.models.platform import Platform
 
 
 class LocalStatus(models.TextChoices):
@@ -31,7 +30,9 @@ class PlaybackAction(models.TextChoices):
 class Video(models.Model):
     """Content known to VHS. Not a download attempt (see Download)."""
 
-    platform = models.CharField(max_length=32, choices=Platform.choices)
+    # A key of engine.platforms, checked by the services: no choices, so that a new platform
+    # needs no migration.
+    platform = models.CharField(max_length=32)
     platform_id = models.CharField(max_length=128)
     title = models.CharField(max_length=500)
     description = models.TextField(blank=True)

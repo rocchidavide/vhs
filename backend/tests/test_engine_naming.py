@@ -2,7 +2,7 @@ from datetime import date
 
 import pytest
 
-from engine.extractors import ChannelMetadata, VideoMetadata
+from engine.metadata import ChannelMetadata, VideoMetadata
 from engine.naming import MAX_TITLE_LENGTH, NamingTemplate, build_basename, with_suffix
 
 

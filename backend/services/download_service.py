@@ -21,16 +21,15 @@ from core.models import (
     Download,
     DownloadStatus,
     LocalStatus,
-    Platform,
     PlaybackAction,
     SourceStatus,
     Video,
 )
 from engine.downloader.base import BaseDownloader, DownloadResult, Progress, describe_media
 from engine.errors import EngineError, ErrorCode, sanitize_message
-from engine.extractors import ChannelMetadata, VideoMetadata, get_extractor
-from engine.extractors.base import build_snapshot
+from engine.metadata import ChannelMetadata, VideoMetadata, build_snapshot, estimate_size
 from engine.naming import NamingTemplate, build_basename, with_suffix
+from engine.platforms import get_platform, platform_for_info
 from engine.urls import normalize_url
 from services.dependencies import get_downloader, get_storage
 from services.jobs import Heartbeat, enqueue_task
@@ -86,9 +85,10 @@ class DownloadService:
         """Create (or return) the download for a video URL. Returns (download, created)."""
         canonical = normalize_url(url)
         info = self.downloader.extract_info(canonical)
-        metadata = get_extractor(info.get("extractor_key")).map(info)
-        if metadata.platform not in Platform.values:
+        platform = platform_for_info(info)
+        if platform is None:
             raise EngineError(ErrorCode.UNSUPPORTED_URL, gettext("Unsupported platform."))
+        metadata = platform.map(info)
 
         with transaction.atomic():
             video = self._upsert_video(metadata)
@@ -122,7 +122,7 @@ class DownloadService:
         except EngineError as exc:
             logger.info("video %s: no current size estimate (%s)", video.platform_id, exc.code)
             return None
-        return get_extractor(info.get("extractor_key")).map(info).estimated_size
+        return estimate_size(info)
 
     def _upsert_video(self, metadata: VideoMetadata) -> Video:
         channel = self._upsert_channel(metadata.channel)
@@ -144,7 +144,7 @@ class DownloadService:
         return video
 
     def _upsert_channel(self, metadata: ChannelMetadata | None) -> Channel | None:
-        if metadata is None or metadata.platform not in Platform.values:
+        if metadata is None or get_platform(metadata.platform) is None:
             return None
         channel, _ = Channel.objects.update_or_create(
             platform=metadata.platform,
