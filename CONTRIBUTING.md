@@ -29,7 +29,7 @@ Dependabot opens pull requests for dependency updates ([.github/dependabot.yml](
 Python every day, with yt-dlp in a pull request of its own, the rest every week.
 
 - A **yt-dlp** update that fixes a platform change is released right away: merge the pull
-  request once the CI is green, then release a patch version (0.2.x).
+  request once the CI is green, then release a patch version (0.3.x).
 - Installations run only releases: the images and the `vhs.tar.gz` bundle published for a
   tag. `main` is where development happens; merging to it reaches nobody until a release.
 

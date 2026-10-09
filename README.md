@@ -11,8 +11,8 @@ the ones in VHS stay yours, on a server at home.
 Supported platforms: YouTube and RaiPlay. VHS is built to support more.
 
 > [!NOTE]
-> **VHS is an early release (0.2).** It does one thing well: archive and play the videos
-> you choose. Many features are deliberately not built yet (other platforms, playlist and
+> **VHS is an early release (0.3).** It does one thing well: archive and play the videos
+> you choose. Many features are deliberately not built yet (more platforms, playlist and
 > channel subscriptions, platform cookies, Jellyfin integration), because what comes next
 > should depend on what people actually need. If you try VHS, tell me what is missing or
 > getting in your way in [Discussions](https://github.com/rocchidavide/vhs/discussions/categories/ideas);
@@ -158,9 +158,9 @@ Linux Mint 22.2 and macOS ([tested environments](docs/installation.md#tested-env
 
 ## Roadmap
 
-VHS 0.2 covers on-demand downloads, the library, playback, local organization, file
-verification and backups, installed and updated from tested releases. Planned next: more
-platforms, platform cookies, subscriptions to channels and playlists,
+VHS 0.3 covers on-demand downloads from YouTube and RaiPlay, the library, playback, local
+organization, file verification and backups, installed and updated from tested releases.
+Planned next: more platforms, platform cookies, subscriptions to channels and playlists,
 Jellyfin integration, network storage (NFS, SMB, NAS) and more automation. Details and
 decisions are in §39 of [architecture.md](docs/architecture.md).
 
