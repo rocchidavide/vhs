@@ -29,6 +29,17 @@ compose_version() {
   sed -nE 's#^[[:space:]]*image: ghcr\.io/rocchidavide/vhs-backend:([^[:space:]]+).*#\1#p' "$1" | head -n 1
 }
 
+# Whether version $1 is newer than $2 (X.Y.Z or X.Y.Z-rc.N). sort -V alone puts a release
+# candidate after its own release.
+newer_version() {
+  [ "$1" != "$2" ] || return 1
+  if [ "${1%%-*}" = "${2%%-*}" ]; then
+    case "$1" in *-*) ;; *) return 0 ;; esac
+    case "$2" in *-*) ;; *) return 1 ;; esac
+  fi
+  [ "$(printf '%s\n' "$1" "$2" | sort -V | tail -n 1)" = "$1" ]
+}
+
 ask() {
   local answer
   read -r -p "$1 [y/N] " answer || answer=""
@@ -228,7 +239,7 @@ case "$command" in
       exit 0
     fi
     # Forward only: the database migrations of a newer version cannot be undone.
-    if [ -n "$current" ] && [ "$(printf '%s\n' "$current" "$latest" | sort -V | tail -n 1)" != "$latest" ]; then
+    if [ -n "$current" ] && ! newer_version "$latest" "$current"; then
       die "this installation (VHS $current) is newer than the latest release ($latest): nothing to update."
     fi
     echo "VHS ${current:-?} -> $latest. Release notes: https://github.com/rocchidavide/vhs/releases/tag/v$latest"
