@@ -43,7 +43,7 @@ Compose should work too: these are only the combinations checked so far.
 |---|---|---|---|
 | Ubuntu Server 26.04.1 LTS (virtual machine) | arm64 | 29.8.2 / 5.5.1 | VHS 0.1: the whole guide: installation, sign-in over HTTP from another computer, a real download, playback (including seeking), symlink protection, backup and restore with `sudo`, automatic restart after a reboot; the update from 0.1.0 to 0.1.1. VHS 0.2: installation from the release bundle, the update from 0.1 and between releases, HTTPS with `VHS_HTTPS`, backup and restore |
 | Linux Mint 22.2 (based on Ubuntu 24.04) | x86_64 | 29.8.2 / 5.5.1 | VHS 0.1: installation and everyday use, file ownership (uid 1000). VHS 0.2: installation from the release bundle, sign-in from another computer, a real download |
-| macOS 26.6 with Docker Desktop | arm64 (Apple Silicon) | 29.7.2 / 5.4.0 | VHS 0.1: installation with sign-in over HTTP from the local network; development environment |
+| macOS 26.6 with Docker Desktop | arm64 (Apple Silicon) | 29.7.2 / 5.4.0 | VHS 0.1: installation with sign-in over HTTP from the local network; development environment. VHS 0.3: installation of 0.2.2 from the release bundle, the update to 0.3.0-rc.1 and to 0.3.0 (database migrations on an existing library), a real download from RaiPlay |
 
 Every change is also tested automatically on Ubuntu x86_64 (backend and frontend tests,
 production images): see the CI in `.github/workflows/ci.yml`. Every release is installed

@@ -579,6 +579,8 @@ container
 video_codec
 audio_codec
 resolution
+audio_language             # BCP 47 language of the archived audio track, "" if unknown
+audio_kind                 # original | default | dubbed | description, "" if unknown
 downloaded_at
 source_metadata_snapshot   # metadata collected at acquisition
 acquired_at
@@ -2309,7 +2311,8 @@ Adding a platform then means: its class, an entry in `PLATFORMS`
 (`engine/platforms/__init__.py`), tests with a recorded `.info.json`, a check of its
 formats against the HTML5 playback policy (§18, §24), and the documentation.
 
-Which platforms come first is not decided yet: it depends on what users ask for.
+RaiPlay was added in 0.3.0, as the second platform. Which ones come next depends on what
+users ask for.
 
 ## Phase 4 — Channel and playlist subscriptions (post-MVP)
 

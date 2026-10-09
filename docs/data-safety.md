@@ -86,6 +86,14 @@ plus a reserve (`VHS_MIN_FREE_BYTES`, 1 GiB by default), and fails before writin
 
 - Tests: `test_download_service.py`, `test_playback_service.py`.
 
+### A thumbnail never costs the video
+
+The thumbnail is converted before the video is downloaded, so that it shows up early. If
+the conversion fails (an image in an unexpected format, a damaged file), VHS records a
+warning and downloads the video without a thumbnail: no download fails because of it.
+
+- Tests: `test_engine_ytdlp.py`.
+
 ### A restored backup is verified
 
 `./vhs backup` saves the database and the library together, with a verification report.
