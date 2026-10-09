@@ -9,7 +9,6 @@ from core.models.download import (
     DownloadStatus,
 )
 from core.models.organization import Collection, CollectionVideo, Tag
-from core.models.platform import Platform
 from core.models.playback import (
     ACTIVE_PREPARATION_STATUSES,
     PlaybackPreparation,
@@ -33,7 +32,6 @@ __all__ = [
     "PlaybackAction",
     "PlaybackPreparation",
     "PlaybackProgress",
-    "Platform",
     "PreparationKind",
     "PreparationStatus",
     "SourceStatus",

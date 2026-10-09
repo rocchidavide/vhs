@@ -408,11 +408,12 @@ vhs/
 │   │   │   ├── base.py
 │   │   │   └── ytdlp.py
 │   │   │
-│   │   ├── extractors/
+│   │   ├── platforms/          # one class per supported platform, and the registry
 │   │   │   ├── base.py
-│   │   │   ├── youtube.py
-│   │   │   └── generic.py
+│   │   │   └── youtube.py
 │   │   │
+│   │   ├── metadata.py         # platform-neutral video metadata
+│   │   ├── urls.py
 │   │   └── naming.py
 │   │
 │   ├── storage/
@@ -488,15 +489,10 @@ vhs/
 
 ## Platform
 
-Enum or lookup table:
-
-```text
-youtube
-vimeo
-dailymotion
-...
-
-```
+A platform is not a table: it is a class in `engine/platforms/`, listed in the registry of
+that package. The `platform` field of `Video` and `Channel` stores its key (`youtube`), which
+is also the platform's folder in the library. The field has no `choices`: the services check
+the key against the registry, so adding a platform needs no migration.
 
 ---
 
@@ -2270,18 +2266,21 @@ shares the library.
 ## Other platforms (post-MVP)
 
 VHS is meant to archive videos from several platforms; YouTube is the first one. The
-structure is already there: yt-dlp supports many sites, metadata is mapped by a
-per-platform extractor (`engine/extractors/`), identity is `(platform, platform_id)` and
-the library has one folder per platform. Each new platform is enabled explicitly, never
-by accepting any URL yt-dlp understands. It needs:
+structure is already there: yt-dlp supports many sites, identity is `(platform,
+platform_id)` and the library has one folder per platform. Each new platform is enabled
+explicitly, never by accepting any URL yt-dlp understands. Everything VHS knows about a
+platform is in one class, a subclass of `Platform` in `engine/platforms/`:
 
-- its value in `Platform` (`core/models/platform.py`), with a migration;
-- URL normalization for its hosts (`engine/urls.py`), so that deduplication works;
-- its metadata extractor (channel, upload date, platform metadata) and tests with a
-  recorded `.info.json`;
-- adding it to the extractors yt-dlp may use (`allowed_extractors` in
-  `engine/downloader/ytdlp.py`);
-- a check of its formats against the HTML5 playback policy (§18, §24).
+- its key and name, its hosts, yt-dlp's `extractor_key` of its videos and the regexes of
+  the yt-dlp extractors it may use (`allowed_extractors` is built from them);
+- `canonical_url()`: the canonical URL of a single video, so that deduplication works, and
+  a clear error for playlists, channels or live streams;
+- the metadata mapping, when the defaults of `Platform` do not fit: channel, short videos,
+  platform metadata.
+
+Adding a platform then means: its class, an entry in `PLATFORMS`
+(`engine/platforms/__init__.py`), tests with a recorded `.info.json`, a check of its
+formats against the HTML5 playback policy (§18, §24), and the documentation.
 
 Which platforms come first is not decided yet: it depends on what users ask for.
 

@@ -18,6 +18,7 @@ from engine.downloader.base import (
     ThumbnailCallback,
 )
 from engine.errors import EngineError, ErrorCode
+from engine.platforms import ytdlp_extractors
 
 logger = logging.getLogger("vhs.engine.ytdlp")
 
@@ -136,7 +137,7 @@ class YTDLPDownloader(BaseDownloader):
             "no_warnings": True,
             "noprogress": True,
             "noplaylist": True,
-            "allowed_extractors": [r"youtube"],
+            "allowed_extractors": ytdlp_extractors(),
             "socket_timeout": 30,
             "retries": 3,
             "fragment_retries": 3,

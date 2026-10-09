@@ -6,7 +6,7 @@ from datetime import date
 from enum import StrEnum
 from pathlib import PurePosixPath
 
-from engine.extractors.base import VideoMetadata
+from engine.metadata import VideoMetadata
 
 
 class NamingTemplate(StrEnum):
