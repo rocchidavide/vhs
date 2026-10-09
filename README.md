@@ -23,7 +23,8 @@ Supported platforms: YouTube and RaiPlay. VHS is built to support more.
 
 ## Features
 
-- **Download by URL** in the background, with progress, retries and recovery after a crash.
+- **Download by URL** from YouTube and RaiPlay, in the background, with progress, retries and
+  recovery after a crash.
 - **A safe archive:** each video is kept with its metadata (`.info.json`), thumbnail and
   SHA-256 checksum, in a folder layout readable without VHS. Files are added only when
   complete, and VHS never writes where its library folder is missing.
@@ -31,7 +32,8 @@ Supported platforms: YouTube and RaiPlay. VHS is built to support more.
   player resumes from there, and a yellow bar under each thumbnail shows your progress
   across the whole library.
 - **Play in the browser,** with seeking. Videos the browser cannot play are adapted; the
-  original file is never modified.
+  original file is never modified. The video's page says which audio track was archived
+  (for example the original language, or RaiPlay's Italian track).
 - **Organize** with personal tags and ordered collections, separate from the platform's
   own tags and playlists.
 - **Search and filter** by title, description, channel, tag or collection.
