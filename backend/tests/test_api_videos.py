@@ -132,6 +132,22 @@ def test_video_detail(admin_client, archived_video):
     assert "file_path" not in body
 
 
+def test_video_detail_shows_the_network_and_the_audio_track(admin_client, archived_video):
+    body = admin_client.get(f"/api/v1/videos/{archived_video.pk}").json()
+    assert (body["network"], body["audio_language"], body["audio_kind"]) == (None, "", "")
+
+    archived_video.platform_metadata = {"network": "Rai 3"}
+    archived_video.audio_language, archived_video.audio_kind = "it", "dubbed"
+    archived_video.save()
+
+    body = admin_client.get(f"/api/v1/videos/{archived_video.pk}").json()
+    assert (body["network"], body["audio_language"], body["audio_kind"]) == (
+        "Rai 3",
+        "it",
+        "dubbed",
+    )
+
+
 def test_video_detail_requires_authentication(client, archived_video):
     assert client.get(f"/api/v1/videos/{archived_video.pk}").status_code == 401
 

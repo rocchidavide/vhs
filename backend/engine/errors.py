@@ -7,6 +7,8 @@ from enum import StrEnum
 class ErrorCode(StrEnum):
     AUTHENTICATION = "authentication"
     SOURCE_UNAVAILABLE = "source_unavailable"
+    GEO_RESTRICTED = "geo_restricted"
+    DRM = "drm"
     NETWORK = "network"
     STORAGE = "storage"
     PROCESSING = "processing"

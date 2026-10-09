@@ -1,10 +1,18 @@
+import subprocess
 from unittest import mock
 
 import pytest
+import yt_dlp
 from yt_dlp.utils import DownloadError
 
 from engine.downloader.base import Progress
-from engine.downloader.ytdlp import StreamProgress, YTDLPDownloader
+from engine.downloader.ytdlp import (
+    DEFAULT_FORMAT,
+    StreamProgress,
+    YTDLPDownloader,
+    _ThumbnailToWebp,
+    format_selector,
+)
 from engine.errors import EngineError, ErrorCode
 
 
@@ -15,7 +23,7 @@ class FakeYoutubeDL:
     script = None
 
     def __init__(self, options):
-        self.options = options
+        self.options = self.params = options
         FakeYoutubeDL.instances.append(self)
 
     def __enter__(self):
@@ -26,6 +34,9 @@ class FakeYoutubeDL:
 
     def sanitize_info(self, info):
         return info
+
+    def add_post_processor(self, postprocessor, when="post_process"):
+        self.postprocessors = [*getattr(self, "postprocessors", []), (postprocessor, when)]
 
     def extract_info(self, url, download):
         return FakeYoutubeDL.script(self, url, download)
@@ -44,8 +55,38 @@ def test_extract_info_restricts_extractors_and_playlists(fake_ydl):
     YTDLPDownloader().extract_info("https://www.youtube.com/watch?v=abc")
 
     options = fake_ydl.instances[0].options
-    assert options["allowed_extractors"] == [r"youtube"]
+    assert options["allowed_extractors"] == [r"youtube", r"raiplay"]
     assert options["noplaylist"] is True
+
+
+RAIPLAY_URL = (
+    "https://www.raiplay.it/video/2021/11/Blanca-S1E1-b1255a4a-8e72-4a2f-b9f3-fc1308e00736.html"
+)
+
+
+def test_each_platform_gets_its_format(fake_ydl):
+    fake_ydl.script = lambda ydl, url, download: {"id": "abc", "_type": "video"}
+
+    YTDLPDownloader().extract_info("https://www.youtube.com/watch?v=abc")
+    YTDLPDownloader().extract_info(RAIPLAY_URL)
+    YTDLPDownloader(format_selector="best").extract_info(RAIPLAY_URL)
+
+    formats = [instance.options["format"] for instance in fake_ydl.instances]
+    # YouTube: yt-dlp's order puts the original track first; RaiPlay marks none: Italian.
+    assert formats == [DEFAULT_FORMAT, format_selector("it"), "best"]
+
+
+def test_errors_are_classified_with_the_platform_of_the_url(fake_ydl):
+    def script(ydl, url, download):
+        raise DownloadError(
+            "ERROR: [RaiPlay] abc: Unable to download JSON metadata: HTTP Error 404"
+        )
+
+    fake_ydl.script = script
+
+    with pytest.raises(EngineError) as excinfo:
+        YTDLPDownloader().extract_info(RAIPLAY_URL)
+    assert excinfo.value.code == ErrorCode.SOURCE_UNAVAILABLE
 
 
 def test_extract_info_rejects_playlists(fake_ydl):
@@ -216,3 +257,53 @@ def test_thumbnail_is_reported_before_the_media_transfer(fake_ydl, tmp_path):
     )
 
     assert events == [("thumbnail", "abc.webp"), "progress"]
+
+
+# Thumbnails ----------------------------------------------------------------------------------
+
+
+def thumbnail_info(path) -> dict:
+    return {
+        "id": "abc",
+        "thumbnails": [{"id": "0", "filepath": str(path)}],
+        "__files_to_move": {str(path): str(path)},
+    }
+
+
+def test_a_jpeg_named_png_becomes_a_webp_thumbnail(tmp_path):
+    # RaiPlay serves JPEG images with a .png name, which yt-dlp's own conversion refuses.
+    image = tmp_path / "abc.png"
+    subprocess.run(
+        [
+            "ffmpeg",
+            "-v",
+            "error",
+            "-f",
+            "lavfi",
+            "-i",
+            "color=red:s=64x36",
+            "-frames:v",
+            "1",
+            "-f",
+            "mjpeg",
+            str(image),
+        ],
+        check=True,
+    )
+
+    with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
+        _ThumbnailToWebp(ydl, format="webp").run(thumbnail_info(image))
+
+    assert (tmp_path / "abc.webp").read_bytes()[8:12] == b"WEBP"
+
+
+def test_a_thumbnail_that_cannot_be_converted_never_fails_the_download(tmp_path):
+    image = tmp_path / "abc.png"
+    image.write_bytes(b"not an image")
+
+    with yt_dlp.YoutubeDL({"quiet": True}) as ydl:
+        files, info = _ThumbnailToWebp(ydl, format="webp").run(thumbnail_info(image))
+
+    assert files == []
+    assert info["id"] == "abc"
+    assert not (tmp_path / "abc.webp").exists()

@@ -1,4 +1,4 @@
-import { t, te } from '@/i18n'
+import { currentLocale, t, te } from '@/i18n'
 
 import { api } from './client'
 import type { CollectionRef, TagRef } from './organization'
@@ -41,6 +41,8 @@ export interface Video {
   platform_id: string
   source_url: string
   channel_name: string | null
+  /** The broadcaster, for platforms whose channel is a series (RaiPlay). */
+  network: string | null
   duration: number | null
   upload_date: string | null
   local_status: 'absent' | 'available' | 'missing'
@@ -50,6 +52,9 @@ export interface Video {
   video_codec: string
   audio_codec: string
   resolution: string
+  /** BCP 47 language of the archived audio track, '' when unknown. */
+  audio_language: string
+  audio_kind: AudioKind
   file_size: number | null
   playback: Playback
   tags: TagRef[]
@@ -108,6 +113,24 @@ export const PLAYBACK_STATUSES: readonly PlaybackStatus[] = ['ready', 'preparing
 
 export function playbackLabel(status: PlaybackStatus): string {
   return t(`playback.status.${status}`)
+}
+
+export type AudioKind = '' | 'original' | 'default' | 'dubbed' | 'description'
+
+/** "Italian · dubbed": the archived audio track; null when nothing is known about it. */
+export function audioTrackLabel(language: string, kind: AudioKind): string | null {
+  const parts: string[] = []
+  if (language) parts.push(languageName(language))
+  if (kind) parts.push(t(`video.audioKind.${kind}`))
+  return parts.length ? parts.join(' · ') : null
+}
+
+function languageName(code: string): string {
+  try {
+    return new Intl.DisplayNames([currentLocale()], { type: 'language' }).of(code) ?? code
+  } catch {
+    return code
+  }
 }
 
 /** Library orderings: the API value and the translation key of its label. */

@@ -5,6 +5,8 @@ A platform is enabled explicitly, never by accepting any URL yt-dlp understands 
 
 from urllib.parse import SplitResult
 
+from engine.audio import AudioTrack, track_from_format
+from engine.errors import ErrorCode
 from engine.metadata import (
     ChannelMetadata,
     VideoMetadata,
@@ -26,6 +28,9 @@ class Platform:
     extractor_keys: frozenset[str] = frozenset()
     # Regexes for yt-dlp's allowed_extractors: the only extractors VHS lets it use.
     ytdlp_extractors: tuple[str, ...] = ()
+    # The language of the track the platform plays by default, for platforms that do not mark
+    # it (yt-dlp marks YouTube's original track): VHS asks for that language first.
+    default_audio_language: str | None = None
 
     def canonical_url(self, parts: SplitResult) -> str:
         """The canonical URL of a single video, or raise EngineError. Deduplication relies on it."""
@@ -72,3 +77,11 @@ class Platform:
     def platform_metadata(self, info: dict) -> dict:
         keys = ("tags", "categories", "live_status", "availability", "age_limit", "extractor")
         return {key: info[key] for key in keys if info.get(key) is not None}
+
+    def audio_track(self, fmt: dict) -> AudioTrack:
+        """Language and kind of a downloaded audio format."""
+        return track_from_format(fmt)
+
+    def classify_error(self, message: str) -> ErrorCode | None:
+        """An error the platform reports in its own way; None for the generic classification."""
+        return None

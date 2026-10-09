@@ -8,7 +8,7 @@ the URL of a video, and it downloads it, archives it with its metadata on your o
 and lets you organize it and play it in the browser. Videos disappear from platforms;
 the ones in VHS stay yours, on a server at home.
 
-YouTube is the first supported platform; VHS is built to support more.
+Supported platforms: YouTube and RaiPlay. VHS is built to support more.
 
 > [!NOTE]
 > **VHS is an early release (0.2).** It does one thing well: archive and play the videos
@@ -160,7 +160,7 @@ Linux Mint 22.2 and macOS ([tested environments](docs/installation.md#tested-env
 
 VHS 0.2 covers on-demand downloads, the library, playback, local organization, file
 verification and backups, installed and updated from tested releases. Planned next: more
-platforms besides YouTube, platform cookies, subscriptions to channels and playlists,
+platforms, platform cookies, subscriptions to channels and playlists,
 Jellyfin integration, network storage (NFS, SMB, NAS) and more automation. Details and
 decisions are in §39 of [architecture.md](docs/architecture.md).
 
@@ -186,7 +186,7 @@ To report a security problem, see [SECURITY.md](SECURITY.md).
 VHS is meant for a personal archive of videos you are allowed to keep. You are responsible
 for what you download and how you use it: respect the terms of service of the platforms
 and the rights of the content owners. VHS does not redistribute content and is not
-affiliated with YouTube or any other platform.
+affiliated with YouTube, RAI or any other platform.
 
 ## License
 

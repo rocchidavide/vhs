@@ -25,6 +25,7 @@ from core.models import (
     SourceStatus,
     Video,
 )
+from engine.audio import downloaded_audio_format
 from engine.downloader.base import BaseDownloader, DownloadResult, Progress, describe_media
 from engine.errors import EngineError, ErrorCode, sanitize_message
 from engine.metadata import ChannelMetadata, VideoMetadata, build_snapshot, estimate_size
@@ -360,6 +361,10 @@ class DownloadService:
             video.video_codec = details.video_codec
             video.audio_codec = details.audio_codec
             video.resolution = details.resolution
+            platform = get_platform(video.platform)
+            audio = platform.audio_track(downloaded_audio_format(info)) if platform else None
+            video.audio_language = audio.language if audio else ""
+            video.audio_kind = audio.kind if audio else ""
             video.downloaded_at = now
             video.acquired_at = video.acquired_at or now
             if info:

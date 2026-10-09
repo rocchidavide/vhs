@@ -9,7 +9,7 @@ from engine.downloader.base import Progress
 from engine.errors import EngineError, ErrorCode
 from services.download_service import InvalidDownloadState, ProgressReporter
 from storage import StorageError
-from tests.conftest import ago, youtube_info
+from tests.conftest import ago, raiplay_info, youtube_info
 
 URL = "https://youtu.be/jNQXAC9IVRw"
 MEDIA = PurePosixPath("youtube/jawed/2005-04-24 - Me at the zoo [jNQXAC9IVRw].mp4")
@@ -510,3 +510,54 @@ def test_history_correction_touches_only_attempts_tied_to_the_current_file(servi
     for ambiguous in (recovered, replaced, moved):
         ambiguous.refresh_from_db()
         assert ambiguous.total_bytes == 3
+
+
+# Platforms and audio tracks -------------------------------------------------------------------
+
+RAIPLAY_URL = "https://www.raiplay.it/video/2021/11/Blanca-S1E1-Senza-occhi-b1255a4a-8e72-4a2f-b9f3-fc1308e00736.html"
+
+
+def test_a_raiplay_video_is_archived_under_its_series(service, storage, fake_downloader):
+    fake_downloader.info_for = lambda url: raiplay_info()
+
+    download, _ = service.request(RAIPLAY_URL)
+    service.execute(download.pk)
+
+    video = Video.objects.get()
+    assert (video.platform, video.platform_id) == (
+        "raiplay",
+        "b1255a4a-8e72-4a2f-b9f3-fc1308e00736",
+    )
+    assert (video.channel.platform, video.channel.name) == ("raiplay", "Blanca")
+    assert video.platform_metadata["network"] == "Rai Premium"
+    assert video.file_path.startswith("raiplay/Blanca/2021-11-19 - Blanca - S1E1 - Senza occhi [")
+    # The Italian track of the fixture's requested formats.
+    assert (video.audio_language, video.audio_kind) == ("it", "default")
+
+
+def test_the_downloaded_audio_track_is_recorded(service, storage, fake_downloader):
+    requested = [
+        {"format_id": "137", "vcodec": "avc1", "acodec": "none"},
+        {
+            "format_id": "140",
+            "vcodec": "none",
+            "acodec": "mp4a.40.2",
+            "language": "en",
+            "language_preference": 10,
+        },
+    ]
+    fake_downloader.info_for = lambda url: youtube_info(requested_formats=requested)
+
+    download, _ = service.request(URL)
+    service.execute(download.pk)
+
+    video = Video.objects.get()
+    assert (video.audio_language, video.audio_kind) == ("en", "original")
+
+
+def test_an_unknown_audio_track_is_recorded_as_unknown(service, storage, fake_downloader):
+    download, _ = service.request(URL)
+    service.execute(download.pk)
+
+    video = Video.objects.get()
+    assert (video.audio_language, video.audio_kind) == ("", "")

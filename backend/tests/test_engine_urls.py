@@ -44,3 +44,40 @@ def test_rejected_urls(url, code):
     with pytest.raises(EngineError) as excinfo:
         normalize_url(url)
     assert excinfo.value.code == code
+
+
+RAIPLAY = "https://www.raiplay.it/video/2021/11/Blanca-S1E1-Senza-occhi-b1255a4a-8e72-4a2f-b9f3-fc1308e00736.html"
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        RAIPLAY,
+        RAIPLAY.replace("www.raiplay.it", "raiplay.it"),
+        RAIPLAY.replace("https://", "http://"),
+        RAIPLAY + "?wt_mc=social",
+        RAIPLAY + "#player",
+    ],
+)
+def test_raiplay_variants_share_the_canonical_url(url):
+    assert normalize_url(url) == RAIPLAY
+
+
+@pytest.mark.parametrize(
+    ("url", "code"),
+    [
+        ("https://www.raiplay.it/programmi/blanca", ErrorCode.PLAYLIST),
+        ("https://www.raiplay.it/programmi/blanca/episodi/stagione-1", ErrorCode.PLAYLIST),
+        ("https://www.raiplay.it/dirette/rai1", ErrorCode.UNSUPPORTED_URL),
+        ("https://www.raiplay.it/", ErrorCode.UNSUPPORTED_URL),
+        ("https://www.raiplay.it/video/2021/11/Blanca.html", ErrorCode.UNSUPPORTED_URL),
+        (
+            "https://www.raiplaysound.it/audio/2021/12/x-1ebae2a7-7cdb-42bb-842e-fe0d193e9707.html",
+            ErrorCode.UNSUPPORTED_URL,
+        ),
+    ],
+)
+def test_rejected_raiplay_urls(url, code):
+    with pytest.raises(EngineError) as excinfo:
+        normalize_url(url)
+    assert excinfo.value.code == code

@@ -1,9 +1,12 @@
 """The platforms VHS supports. To add one: a Platform subclass in this package, listed here."""
 
+from urllib.parse import urlsplit
+
 from engine.platforms.base import Platform
+from engine.platforms.raiplay import RaiPlay
 from engine.platforms.youtube import YouTube
 
-PLATFORMS: tuple[Platform, ...] = (YouTube(),)
+PLATFORMS: tuple[Platform, ...] = (YouTube(), RaiPlay())
 
 _BY_KEY = {platform.key: platform for platform in PLATFORMS}
 _BY_HOST = {host: platform for platform in PLATFORMS for host in platform.hosts}
@@ -16,6 +19,10 @@ def get_platform(key: str | None) -> Platform | None:
 
 def platform_for_host(host: str) -> Platform | None:
     return _BY_HOST.get(host.lower().rstrip("."))
+
+
+def platform_for_url(url: str) -> Platform | None:
+    return platform_for_host(urlsplit(url).hostname or "")
 
 
 def platform_for_info(info: dict) -> Platform | None:
@@ -33,5 +40,6 @@ __all__ = [
     "get_platform",
     "platform_for_host",
     "platform_for_info",
+    "platform_for_url",
     "ytdlp_extractors",
 ]
