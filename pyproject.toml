@@ -1,6 +1,6 @@
 [project]
 name = "vhs"
-version = "0.2.1"
+version = "0.2.2"
 description = "Video Hoarding System — a personal video library to archive and play videos"
 readme = "README.md"
 license = "MIT"
