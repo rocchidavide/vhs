@@ -32,6 +32,12 @@ class Platform:
         raise NotImplementedError
 
     def map(self, info: dict) -> VideoMetadata:
+        """Platform-neutral metadata from yt-dlp's info.
+
+        The fields read here are yt-dlp's common ones, the same for every extractor. What
+        differs between platforms goes in the methods a subclass overrides: map_channel(),
+        is_short() and platform_metadata().
+        """
         return VideoMetadata(
             platform=self.key,
             platform_id=str(info["id"]),
