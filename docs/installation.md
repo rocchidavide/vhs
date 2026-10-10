@@ -165,7 +165,7 @@ commands that delete data, and it refuses to start with the development `.env`.
 | Initialize an existing library | `./vhs init-library` | `… manage.py init_library` |
 | Backup | `sudo ./vhs backup <folder>` | `scripts/backup.sh <folder>` |
 | Restore | `sudo ./vhs restore <backup>` | `scripts/restore.sh <backup>` |
-| Update | `./vhs update` | download the latest `vhs.tar.gz`, then `docker compose pull` and `docker compose up -d` |
+| Update | `./vhs update` | download the latest `vhs.tar.gz` and its images (`docker pull`), replace the files, then `docker compose up -d` |
 | Other Django commands | `./vhs manage <command>` | `… manage.py <command>` |
 
 > `./dev` is **only for people who develop** VHS: in an installation it refuses to
@@ -330,10 +330,12 @@ Make a backup first, then:
 ```
 
 It downloads the latest release and shows which version it brings, with a link to its
-notes. After you confirm, it replaces the files of the release in the VHS folder (never
-`.env`), downloads the new images (`docker compose pull`) and restarts VHS
-(`docker compose up -d`). Database migrations are applied automatically at startup. If you
-already have the latest release, it changes nothing.
+notes. After you confirm, it downloads the new images (`docker pull`), replaces the files
+of the release in the VHS folder (never `.env`) and restarts VHS (`docker compose up -d`).
+Database migrations are applied automatically at startup. If you already have the latest
+release, it changes nothing. If an image cannot be downloaded, for example because the
+connection drops, it stops before touching any file: VHS keeps running the previous
+release, and you can run `./vhs update` again.
 
 Every installation of the same version runs the same images: those built and tested for
 that release, published on GitHub's container registry (`ghcr.io/rocchidavide`).
