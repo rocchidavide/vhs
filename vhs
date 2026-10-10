@@ -245,7 +245,7 @@ case "$command" in
     echo "VHS ${current:-?} -> $latest. Release notes: https://github.com/rocchidavide/vhs/releases/tag/v$latest"
     check_database "${1:-}"
     if [ "${1:-}" != "--yes" ]; then
-      echo "Updating replaces the VHS files in this folder (never .env), downloads the new images"
+      echo "Updating downloads the new images, replaces the VHS files in this folder (never .env)"
       echo "and restarts VHS; the database is migrated at startup. Make a backup first:"
       echo "./vhs backup <folder>"
       read -r -p "Update now? [y/N] " answer || answer=""
@@ -254,13 +254,18 @@ case "$command" in
         *) die "update cancelled." ;;
       esac
     fi
+    # The images first: if one cannot be downloaded, the folder still is the previous release.
+    while read -r image; do
+      run docker pull -q "$image" >/dev/null \
+        || die "could not download $image. Nothing was changed: this folder still has VHS ${current:-the previous release}. Check the connection and run ./vhs update again."
+    done < <(sed -nE 's#^[[:space:]]*image:[[:space:]]*([^[:space:]]+).*#\1#p' \
+      "$work/release/docker-compose.yml" | sort -u)
     # Each file is replaced by a rename, this script included: the running copy is not changed.
     (cd "$work/release" && find . -type f) | while read -r file; do
       mkdir -p "$(dirname "$file")"
       cp -p "$work/release/$file" "$file.new"
       mv -f "$file.new" "$file"
     done
-    run docker compose pull
     run docker compose up -d
     record_database
     ;;
