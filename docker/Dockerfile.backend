@@ -4,9 +4,9 @@
 
 # Tools copied into the image, with fixed versions so that every build is the same
 # (Dependabot updates them, .github/dependabot.yml).
-FROM ghcr.io/astral-sh/uv:0.12.23 AS uv
+FROM ghcr.io/astral-sh/uv:0.13.6 AS uv
 # JavaScript runtime required by yt-dlp for YouTube.
-FROM denoland/deno:bin-2.9.7 AS deno
+FROM denoland/deno:bin-2.9.8 AS deno
 
 FROM python:3.13-slim AS base
 
