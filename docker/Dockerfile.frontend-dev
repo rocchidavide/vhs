@@ -1,5 +1,5 @@
 # Development only (docker-compose.dev.yml): Vite dev server with the frontend code mounted.
-FROM node:24-alpine
+FROM node:26-alpine
 
 # node_modules lives in a named volume: create the mount point owned by "node" (uid 1000) so
 # that the new volume inherits that owner instead of root.
