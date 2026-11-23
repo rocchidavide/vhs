@@ -13,11 +13,12 @@ updates:
     schedule:
       interval: daily
     groups:
+      # "yt-dlp*": pyproject.toml asks for yt-dlp[default], which a bare "yt-dlp" does not match.
       yt-dlp:
-        patterns: ["yt-dlp"]
+        patterns: ["yt-dlp*"]
       python:
         patterns: ["*"]
-        exclude-patterns: ["yt-dlp"]
+        exclude-patterns: ["yt-dlp*"]
         update-types: [minor, patch]
 
   - package-ecosystem: npm
