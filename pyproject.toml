@@ -12,7 +12,7 @@ dependencies = [
     "django-q2>=1.11.1",
     "psycopg[binary]>=3.3.6",
     "uvicorn>=0.54.0",
-    "yt-dlp[default]>=2026.8.19",
+    "yt-dlp[default]>=2026.10.26",
 ]
 
 [dependency-groups]
