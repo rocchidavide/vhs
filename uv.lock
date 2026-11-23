@@ -759,7 +759,7 @@ requires-dist = [
     { name = "django-q2", specifier = ">=1.11.1" },
     { name = "psycopg", extras = ["binary"], specifier = ">=3.3.9" },
     { name = "uvicorn", specifier = ">=0.54.0" },
-    { name = "yt-dlp", extras = ["default"], specifier = ">=2026.8.19" },
+    { name = "yt-dlp", extras = ["default"], specifier = ">=2026.10.26" },
 ]
 
 [package.metadata.requires-dev]
