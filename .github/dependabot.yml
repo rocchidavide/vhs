@@ -36,6 +36,11 @@ updates:
     groups:
       docker-images:
         patterns: ["*"]
+    ignore:
+      # A new Python version is a choice of its own: dependencies such as brotli may not have
+      # wheels for it yet, and the slim image has no compiler to build them.
+      - dependency-name: python
+        update-types: [version-update:semver-minor]
 
   # PostgreSQL: patch releases of the same major version only. A new major version changes
   # the data format and needs a dump and restore (docs/installation.md).
